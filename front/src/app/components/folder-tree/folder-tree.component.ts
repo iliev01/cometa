@@ -18,6 +18,8 @@ import { SharedActionsService } from '@services/shared-actions.service';
 import { FolderItemTreeComponent } from '../folder-item-tree/folder-item-tree.component';
 import { NgFor, AsyncPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 
 @Component({
   selector: 'cometa-folder-tree',
