@@ -5,35 +5,55 @@
     <div class="grid-schedule" *ngIf="formLayout == 1">
       <mat-form-field floatLabel="always">
         <mat-label>Minute</mat-label>
-        <input formControlName="minute" disableAutocomplete matInput />
+        <input 
+          formControlName="minute" 
+          disableAutocomplete 
+          matInput
+        />
         <mat-error *ngIf="schedule.get('minute').hasError('pattern')"
           >Invalid format</mat-error
         >
       </mat-form-field>
       <mat-form-field floatLabel="always">
         <mat-label>Hour</mat-label>
-        <input formControlName="hour" disableAutocomplete matInput />
+        <input 
+          formControlName="hour" 
+          disableAutocomplete 
+          matInput 
+        />
         <mat-error *ngIf="schedule.get('hour').hasError('pattern')"
           >Invalid format</mat-error
         >
       </mat-form-field>
       <mat-form-field floatLabel="always">
         <mat-label>Day</mat-label>
-        <input formControlName="day" disableAutocomplete matInput />
+        <input 
+          formControlName="day" 
+          disableAutocomplete 
+          matInput
+        />
         <mat-error *ngIf="schedule.get('day').hasError('pattern')"
           >Invalid format</mat-error
         >
       </mat-form-field>
       <mat-form-field floatLabel="always">
         <mat-label>Month</mat-label>
-        <input formControlName="month" disableAutocomplete matInput />
+        <input 
+          formControlName="month" 
+          disableAutocomplete 
+          matInput 
+        />
         <mat-error *ngIf="schedule.get('month').hasError('pattern')"
           >Invalid format</mat-error
         >
       </mat-form-field>
       <mat-form-field floatLabel="always">
         <mat-label>Day of week</mat-label>
-        <input formControlName="dayWeek" disableAutocomplete matInput />
+        <input 
+          formControlName="dayWeek" 
+          disableAutocomplete 
+          matInput 
+        />
         <mat-error *ngIf="schedule.get('dayWeek').hasError('pattern')"
           >Invalid format</mat-error
         >
@@ -45,7 +65,11 @@
         <div>
           <mat-form-field floatLabel="always">
             <mat-label>Minute</mat-label>
-            <input formControlName="minute" disableAutocomplete matInput />
+            <input 
+              formControlName="minute" 
+              disableAutocomplete 
+              matInput 
+            />
             <mat-error *ngIf="schedule.get('minute').hasError('pattern')"
               >Invalid format</mat-error
             >
@@ -60,7 +84,11 @@
         <div>
           <mat-form-field floatLabel="always">
             <mat-label>Hour</mat-label>
-            <input formControlName="hour" disableAutocomplete matInput />
+            <input 
+              formControlName="hour" 
+              disableAutocomplete 
+              matInput 
+            />
             <mat-error *ngIf="schedule.get('hour').hasError('pattern')"
               >Invalid format</mat-error
             >
@@ -76,7 +104,11 @@
         <div>
           <mat-form-field floatLabel="always">
             <mat-label>Day of Month</mat-label>
-            <input formControlName="day" disableAutocomplete matInput />
+            <input 
+              formControlName="day" 
+              disableAutocomplete 
+              matInput 
+            />
             <mat-error *ngIf="schedule.get('day').hasError('pattern')"
               >Invalid format</mat-error
             >
@@ -91,7 +123,11 @@
         <div>
           <mat-form-field floatLabel="always">
             <mat-label>Month</mat-label>
-            <input formControlName="month" disableAutocomplete matInput />
+            <input 
+              formControlName="month" 
+              disableAutocomplete 
+              matInput 
+            />
             <mat-error *ngIf="schedule.get('month').hasError('pattern')"
               >Invalid format</mat-error
             >
@@ -107,7 +143,11 @@
         <div>
           <mat-form-field floatLabel="always">
             <mat-label>Day of week</mat-label>
-            <input formControlName="dayWeek" disableAutocomplete matInput />
+            <input 
+              formControlName="dayWeek" 
+              disableAutocomplete 
+              matInput 
+            />
             <mat-error *ngIf="schedule.get('dayWeek').hasError('pattern')"
               >Invalid format</mat-error
             >

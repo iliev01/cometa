@@ -189,9 +189,6 @@ export class EditFeature implements OnInit, OnDestroy {
   @ViewChild(StepEditorComponent, { static: false })
   stepEditor: StepEditorComponent;
 
-  @ViewChild(EditSchedule, { static: false })
-  EditSch: EditSchedule;
-
   inputFocus: boolean = false;
 
   private inputFocusSubscription: Subscription;
@@ -219,8 +216,6 @@ export class EditFeature implements OnInit, OnDestroy {
 
     this.inputFocusService.inputFocus$.subscribe(isFocused => {
       this.inputFocus = isFocused;
-      console.log("inputFocus state in ParentComponent: " + isFocused);
-      // Puedes manejar el cambio de enfoque aquí si es necesario
     });
 
     // Create the fields within FeatureForm

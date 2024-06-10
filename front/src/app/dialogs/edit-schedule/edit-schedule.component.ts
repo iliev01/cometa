@@ -1,4 +1,8 @@
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { 
+  Component, 
+  Inject, 
+  ChangeDetectionStrategy
+} from '@angular/core';
 import {
   MatLegacyDialogRef as MatDialogRef,
   MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
@@ -91,7 +95,7 @@ export class EditSchedule {
     private _dialog: MatDialog,
     private _store: Store,
     private _fb: UntypedFormBuilder,
-    private log: LogService
+    private log: LogService,
   ) {
     this.log.msg('1', 'Edit Schedule Constuctor', 'edit-schedule');
 
