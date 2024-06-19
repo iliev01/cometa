@@ -28,8 +28,8 @@ import { ElementRef, HostListener } from '@angular/core';
 import { KEY_CODES } from '@others/enums';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
-
-
+import { InputFocusService } from '@services/inputFocus.service';
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'cometa-data-driven-runs',
   templateUrl: './data-driven-runs.component.html',
@@ -61,8 +61,15 @@ export class DataDrivenRunsComponent implements OnInit {
     private _http: HttpClient,
     public _dialog: MatDialog,
     private _api: ApiService,
-    private buttonDataDrivenTest: ElementRef
-  ) {}
+    private buttonDataDrivenTest: ElementRef,
+    private inputFocusService: InputFocusService
+  ) {
+
+    this.focusSubscription = this.inputFocusService.inputFocus$.subscribe((inputFocused) => {
+      this.inputFocus = inputFocused;
+    });
+    
+  }
 
   columns: MtxGridColumn[] = [
     { header: 'Status', field: 'status', sortable: true },
@@ -128,6 +135,8 @@ export class DataDrivenRunsComponent implements OnInit {
   isLoading = true;
   showPagination = true;
   latestFeatureResultId: number = 0;
+  inputFocus = false;
+  focusSubscription: Subscription;
 
   query = {
     page: 0,
@@ -232,33 +241,24 @@ export class DataDrivenRunsComponent implements OnInit {
 
     const overviewDiv = document.querySelector(".mat-mdc-dialog-surface");
 
-    switch (event.keyCode) {
-      case KEY_CODES.T:
-        // Observe if the class of div its available
-        if (overviewDiv == null) {
-          if(columnsShow != null){
+    if (!this.inputFocus){
+      switch (event.keyCode) {
+        case KEY_CODES.T:
+          // Observe if the class of div its available
+          if (overviewDiv == null) {
+            if(columnsShow != null){
+              this.buttonDataDrivenTest.nativeElement.querySelector('.mat-mdc-button-touch-target').click();
+            }
+            this.buttonDataDrivenTest.nativeElement.querySelector('.mdc-button__label').click();
+          }
+          break;
+        case KEY_CODES.S:
+          if(overviewDiv == null) {
             this.buttonDataDrivenTest.nativeElement.querySelector('.mat-mdc-button-touch-target').click();
           }
-          this.buttonDataDrivenTest.nativeElement.querySelector('.mdc-button__label').click();
-        }
-        break;
-      case KEY_CODES.S:
-        if(overviewDiv == null) {
-          this.buttonDataDrivenTest.nativeElement.querySelector('.mat-mdc-button-touch-target').click();
-        }
-        break;
+          break;
+      }
     }
-  }
-
-  // Check if mouse is over the button (shortcuts view)
-  isHovered = false;
-
-  onMouseOver() {
-    this.isHovered = true;
-  }
-
-  onMouseOut() {
-    this.isHovered = false;
   }
 
 }
