@@ -214,7 +214,7 @@ export class EditFeature implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private fileUpload: FileUploadService,
     @Inject(API_URL) public api_url: string,
-    private inputFocusService: InputFocusService
+    private inputFocusService: InputFocusService,
   ) {
 
     this.inputFocusService.inputFocus$.subscribe(isFocused => {
@@ -869,6 +869,11 @@ export class EditFeature implements OnInit, OnDestroy {
    * @returns
    */
   async editOrCreate() {
+    
+    // if (document.querySelector('.mat-dialog-container')) {
+    //   this._snackBar.open('An error occurred.', 'OK');
+    //   return;
+    // }
     // Get current steps from Store
     let currentSteps = [];
     if (this.stepEditor) {
@@ -1006,34 +1011,27 @@ export class EditFeature implements OnInit, OnDestroy {
       dataToSend.feature_id = 0;
     }
     this.saving$.next(true);
+    console.log(console.log('0', document.querySelector('cometa-error')));
     this._api
       .patchFeature(dataToSend.feature_id, dataToSend, {
         loading: 'translate:tooltips.saving_feature',
       })
       .pipe(finalize(() => this.saving$.next(false)))
       .subscribe(res => {
-        // res.info contains the feature data
-        // res.success contains true or false
-
-        // After sending the XHR we have received the result in "res"
-        // Checking for success and not
-        // .... show snackBar
-        // .... move feature to folder, if necesarry
-        // .... show dialog according to new or clone & save/edit
-        if (res.success) {
-          // If XHR was ok
-          this._snackBar.open('Feature saved.', 'OK');
-          this._store.dispatch(new Features.UpdateFeatureOffline(res.info));
-          // Toggles the welcome to false, meaning that the user is no longer new in co.meta
-          this.toggleWelcome();
-          this.manageFeatureDialogData(res, dataToSend);
-        } else {
-          // If XHR was ok
+        console.log(res.success);
+        if (!res.success) {
           this._snackBar.open('An error occurred.', 'OK');
+          return; // No continuar con la creación del feature
         }
-      });
+    
+        // Si la operación fue exitosa
+        this._snackBar.open('Feature saved.', 'OK');
+        this._store.dispatch(new Features.UpdateFeatureOffline(res.info));
+        this.toggleWelcome();
+        this.manageFeatureDialogData(res, dataToSend); 
+      })
   }
-
+  
   /**
    * Decides what to do with the data after clicking submit on the feature edit dialog: clone, create or edit feature
    * @param res
@@ -1048,6 +1046,7 @@ export class EditFeature implements OnInit, OnDestroy {
       this._store.dispatch(new Features.GetFolders());
     }
 
+    console.log("ManageFeatureDialogData");
     // dialog when saving or cloning
     if (this.data.mode === 'edit' || this.data.mode === 'clone') {
       // dialog for clone and save
