@@ -864,173 +864,176 @@ export class EditFeature implements OnInit, OnDestroy {
       });
   }
 
-  /**
+ /**
    * Creates a new feature or edits an existing one. It executes whenever the user clicks on the create / save button in the feature dialog
    * @returns
    */
-  async editOrCreate() {
-    
-    // if (document.querySelector('.mat-dialog-container')) {
-    //   this._snackBar.open('An error occurred.', 'OK');
-    //   return;
-    // }
-    // Get current steps from Store
-    let currentSteps = [];
-    if (this.stepEditor) {
-      // Check if StepEditor exists
-      currentSteps = this.stepEditor.getSteps();
-      if (this.stepEditor.stepsForm) {
-        // Check steps validity
-        if (!this.stepEditor.stepsForm.valid) {
-          const result = await this.openAreYouSureDialog();
-          if (!result) {
-            // Focus on on first invalid step
-            try {
-              document
-                .querySelector<HTMLTextAreaElement>('.invalid-step textarea')
-                .focus();
-            } catch (err) {
-              console.log('Failed to focus on step input');
-            }
-            return;
-          }
-          /**
-           OLD LOGIC - Before 2021-12-30
-          this._snackBar.open('One or more steps are invalid, fix them before saving.', 'OK', { duration: 5000 });
+ async editOrCreate() {
+  // Get current steps from Store
+  let currentSteps = [];
+  if (this.stepEditor) {
+    // Check if StepEditor exists
+    currentSteps = this.stepEditor.getSteps();
+    if (this.stepEditor.stepsForm) {
+      // Check steps validity
+      if (!this.stepEditor.stepsForm.valid) {
+        const result = await this.openAreYouSureDialog();
+        if (!result) {
           // Focus on on first invalid step
           try {
-            document.querySelector<HTMLTextAreaElement>('.invalid-step textarea').focus();
-          } catch (err) { console.log('Failed to focus on step input') }
+            document
+              .querySelector<HTMLTextAreaElement>('.invalid-step textarea')
+              .focus();
+          } catch (err) {
+            console.log('Failed to focus on step input');
+          }
           return;
-          */
         }
+        /**
+         OLD LOGIC - Before 2021-12-30
+        this._snackBar.open('One or more steps are invalid, fix them before saving.', 'OK', { duration: 5000 });
+        // Focus on on first invalid step
+        try {
+          document.querySelector<HTMLTextAreaElement>('.invalid-step textarea').focus();
+        } catch (err) { console.log('Failed to focus on step input') }
+        return;
+        */
       }
-    } else {
-      // If StepEditor doesn't exist grab steps from Store
-      // @ts-ignore
-      if (!this.feature) this.feature = { feature_id: 0 };
-      const featureId =
-        this.data.mode === 'clone' ? 0 : this.data.feature.feature_id;
-      currentSteps = this._store.selectSnapshot(
-        CustomSelectors.GetFeatureSteps(featureId)
-      );
     }
-    const steps = {
-      // Remove empty steps
-      steps_content: currentSteps.filter(step => !!step.step_content),
-      screenshots: [],
-      compares: [],
-    };
-    // Create screenshots and compares arrays from current steps
-    steps.steps_content
-      .filter(step => step.enabled)
-      .forEach((item, index) => {
-        if (item.screenshot) steps.screenshots.push(index + 1);
-        if (item.compare) steps.compares.push(index + 1);
-      });
-    const incompletePrefix = 'Feature info is incomplete';
-    // Get current selectors information ids
-    let departmentId, appId, environmentId;
-    // Check Department ID
-    try {
-      departmentId = this.departments$.find(
-        dep =>
-          dep.department_name === this.featureForm.get('department_name').value
-      ).department_id;
-    } catch (err) {
-      this.focusFormControl('department_name');
-      this._snackBar.open(`${incompletePrefix}: missing department`);
-      return;
-    }
-    // Check App ID
-    try {
-      appId = this.applications$.find(
-        app => app.app_name === this.featureForm.get('app_name').value
-      ).app_id;
-    } catch (err) {
-      this.focusFormControl('app_name');
-      this._snackBar.open(`${incompletePrefix}: missing application`);
-      return;
-    }
-    // Check Environment ID
-    try {
-      environmentId = this.environments$.find(
-        env =>
-          env.environment_name ===
-          this.featureForm.get('environment_name').value
-      ).environment_id;
-    } catch (err) {
-      this.focusFormControl('environment_name');
-      this._snackBar.open(`${incompletePrefix}: missing environment`);
-      return;
-    }
-    // Check Feature Name
-    if (!this.featureForm.get('feature_name').valid) {
-      this.focusFormControl('feature_name');
-      this._snackBar.open(`${incompletePrefix}: missing name`);
-      return;
-    }
-    const fValues = this.featureForm.value;
-    // Create FormData for sending XHR
-    const dataToSend = {
-      ...this.featureForm.value,
-      steps: steps,
-      environment_id: environmentId,
-      app_id: appId,
-      department_id: departmentId,
-      browsers: this.browserstackBrowsers.getValue(),
-    };
-    // Construct schedule for sending
-    if (fValues.run_now) {
-      dataToSend.schedule = [
-        fValues.minute,
-        fValues.hour,
-        fValues.day_month,
-        fValues.month,
-        fValues.day_week,
-      ].join(' ');
-    } else {
-      dataToSend.schedule = '';
-    }
+  } else {
+    // If StepEditor doesn't exist grab steps from Store
+    // @ts-ignore
+    if (!this.feature) this.feature = { feature_id: 0 };
+    const featureId =
+      this.data.mode === 'clone' ? 0 : this.data.feature.feature_id;
+    currentSteps = this._store.selectSnapshot(
+      CustomSelectors.GetFeatureSteps(featureId)
+    );
+  }
+  const steps = {
+    // Remove empty steps
+    steps_content: currentSteps.filter(step => !!step.step_content),
+    screenshots: [],
+    compares: [],
+  };
+  // Create screenshots and compares arrays from current steps
+  steps.steps_content
+    .filter(step => step.enabled)
+    .forEach((item, index) => {
+      if (item.screenshot) steps.screenshots.push(index + 1);
+      if (item.compare) steps.compares.push(index + 1);
+    });
+  const incompletePrefix = 'Feature info is incomplete';
+  // Get current selectors information ids
+  let departmentId, appId, environmentId;
+  // Check Department ID
+  try {
+    departmentId = this.departments$.find(
+      dep =>
+        dep.department_name === this.featureForm.get('department_name').value
+    ).department_id;
+  } catch (err) {
+    this.focusFormControl('department_name');
+    this._snackBar.open(`${incompletePrefix}: missing department`);
+    return;
+  }
+  // Check App ID
+  try {
+    appId = this.applications$.find(
+      app => app.app_name === this.featureForm.get('app_name').value
+    ).app_id;
+  } catch (err) {
+    this.focusFormControl('app_name');
+    this._snackBar.open(`${incompletePrefix}: missing application`);
+    return;
+  }
+  // Check Environment ID
+  try {
+    environmentId = this.environments$.find(
+      env =>
+        env.environment_name ===
+        this.featureForm.get('environment_name').value
+    ).environment_id;
+  } catch (err) {
+    this.focusFormControl('environment_name');
+    this._snackBar.open(`${incompletePrefix}: missing environment`);
+    return;
+  }
+  // Check Feature Name
+  if (!this.featureForm.get('feature_name').valid) {
+    this.focusFormControl('feature_name');
+    this._snackBar.open(`${incompletePrefix}: missing name`);
+    return;
+  }
+  const fValues = this.featureForm.value;
+  // Create FormData for sending XHR
+  const dataToSend = {
+    ...this.featureForm.value,
+    steps: steps,
+    environment_id: environmentId,
+    app_id: appId,
+    department_id: departmentId,
+    browsers: this.browserstackBrowsers.getValue(),
+  };
+  // Construct schedule for sending
+  if (fValues.run_now) {
+    dataToSend.schedule = [
+      fValues.minute,
+      fValues.hour,
+      fValues.day_month,
+      fValues.month,
+      fValues.day_week,
+    ].join(' ');
+  } else {
+    dataToSend.schedule = '';
+  }
 
-    // --------------------------------------------
-    // Save XHR
-    // ... now dataToSend has been prepared and we can send it to Backend
-    // ... Different for save & clone and create
-    // ... create dialog asks if you want to run it now
-    // ... data.mode can be 'new', 'clone', 'edit'
-    // -------------------------------------------------
-    // Special code for when editing or clonning feature
-    // -------------------------------------------------
-    dataToSend.feature_id = this.data.feature.feature_id;
-    dataToSend.cloud = this.feature.getValue().cloud;
-    if (this._browserSelection) {
-      dataToSend.cloud = this._browserSelection.testing_cloud.value;
-    }
-    if (this.data.mode === 'clone' || this.data.mode === 'new') {
-      dataToSend.feature_id = 0;
-    }
-    this.saving$.next(true);
-    console.log(console.log('0', document.querySelector('cometa-error')));
-    this._api
-      .patchFeature(dataToSend.feature_id, dataToSend, {
-        loading: 'translate:tooltips.saving_feature',
-      })
-      .pipe(finalize(() => this.saving$.next(false)))
-      .subscribe(res => {
-        console.log(res.success);
-        if (!res.success) {
-          this._snackBar.open('An error occurred.', 'OK');
-          return; // No continuar con la creación del feature
-        }
-    
-        // Si la operación fue exitosa
+  // --------------------------------------------
+  // Save XHR
+  // ... now dataToSend has been prepared and we can send it to Backend
+  // ... Different for save & clone and create
+  // ... create dialog asks if you want to run it now
+  // ... data.mode can be 'new', 'clone', 'edit'
+  // -------------------------------------------------
+  // Special code for when editing or clonning feature
+  // -------------------------------------------------
+  dataToSend.feature_id = this.data.feature.feature_id;
+  dataToSend.cloud = this.feature.getValue().cloud;
+  if (this._browserSelection) {
+    dataToSend.cloud = this._browserSelection.testing_cloud.value;
+  }
+  if (this.data.mode === 'clone' || this.data.mode === 'new') {
+    dataToSend.feature_id = 0;
+  }
+  this.saving$.next(true);
+  this._api
+    .patchFeature(dataToSend.feature_id, dataToSend, {
+      loading: 'translate:tooltips.saving_feature',
+    })
+    .pipe(finalize(() => this.saving$.next(false)))
+    .subscribe(res => {
+      // res.info contains the feature data
+      // res.success contains true or false
+
+      // After sending the XHR we have received the result in "res"
+      // Checking for success and not
+      // .... show snackBar
+      // .... move feature to folder, if necesarry
+      // .... show dialog according to new or clone & save/edit
+      if (res.success) {
+        // If XHR was ok
         this._snackBar.open('Feature saved.', 'OK');
         this._store.dispatch(new Features.UpdateFeatureOffline(res.info));
+        // Toggles the welcome to false, meaning that the user is no longer new in co.meta
         this.toggleWelcome();
-        this.manageFeatureDialogData(res, dataToSend); 
-      })
+        this.manageFeatureDialogData(res, dataToSend);
+      } else {
+        // If XHR was ok
+        this._snackBar.open('An error occurred.', 'OK');
+      }
+    });
   }
+
   
   /**
    * Decides what to do with the data after clicking submit on the feature edit dialog: clone, create or edit feature
