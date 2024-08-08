@@ -1003,18 +1003,14 @@ input[type='number'] {
   display: flex;
   align-items: center;
   width: 250px;
+  span{
+    color: #5D6D7E;
+  }
 }
 
-.schedule-active {
-  display: flex;
-}
-
-.schedule-grey {
-  color: #5D6D7E;
-}
-
-.schedule-green {
+.schedule-active{
   color: #00a99d;
+  display: flex;
 }
 
 draggable-window{
