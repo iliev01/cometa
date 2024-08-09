@@ -281,6 +281,16 @@ body::-webkit-scrollbar-corner {
   }
 }
 
+.mat-menu-panel.folderOptionsMenu {
+  background: darken(white, 0.5) !important;
+  .mat-icon {
+    font-size: 21px !important;
+  }
+  .run-feature * {
+    color: $blue !important;
+  }
+}
+
 .mat-menu-item {
   height: 30px !important;
   line-height: 30px !important;

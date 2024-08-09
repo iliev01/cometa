@@ -231,6 +231,17 @@ Author: dph000
       </button>
       <!-- Menu to manage folder -->
       <mat-menu class="folderOptionsMenu" #folderOptions="matMenu">
+        <!-- Run all features -->
+        <button
+        (click)="runAllFeatures()"
+        class="run-feature"
+        [matTooltip]="'tooltips.run_feature' | translate"
+        matTooltipPosition="after"
+        mat-menu-item>
+          <mat-icon>play_circle_filled</mat-icon>
+          <span>Run all feat.</span>
+        </button>
+        <mat-divider></mat-divider>
         <!-- Open folder -->
         <button (click)="goFolder(item.route)" mat-menu-item>
           <mat-icon>folder_open</mat-icon>
@@ -246,6 +257,7 @@ Author: dph000
           <mat-icon>folder</mat-icon>
           <span>Move</span>
         </button>
+        <mat-divider></mat-divider>
         <!-- Delete folder -->
         <button (click)="delete(item.reference)" class="remove" mat-menu-item>
           <mat-icon>delete</mat-icon>

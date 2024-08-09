@@ -45,6 +45,7 @@ import {
   LowerCasePipe,
 } from '@angular/common';
 
+
 @Component({
   selector: 'cometa-l1-feature-item-list',
   templateUrl: './l1-feature-item-list.component.html',
@@ -190,5 +191,16 @@ export class L1FeatureItemListComponent implements OnInit {
   SAmoveFeature(feature: Feature) {
     this.log.msg('1', 'Moving feature...', 'feature-item-list', feature);
     this._sharedActions.moveFeature(feature);
+  }
+
+  runAllFeatures(){
+    if(this.item.type == 'folder'){
+      console.log(this.item);
+      console.log(this.item.reference.features);
+      for (let i = 0; i < this.item.reference.features.length; i++) {
+        this._sharedActions.run(this.item.reference.features[i])
+        console.log(i, "running:",this.item.reference.features[i] );
+      }
+    }
   }
 }
