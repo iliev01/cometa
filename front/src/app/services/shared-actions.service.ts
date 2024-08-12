@@ -179,45 +179,48 @@ export class SharedActionsService {
     const feature = this._store.selectSnapshot<Feature>(
       CustomSelectors.GetFeatureInfo(featureId)
     );
-    if (isRunning) {
-      // Notify WebSocket Server to send me last websockets of feature
-      this.retrieveLastFeatureSockets(featureId);
-      this.openLiveSteps(featureId);
-    } else {
-      // Check if the feature has at least 1 browser selected, if not, show a warning
-      if (feature.browsers.length > 0) {
-        this._store.dispatch(new LoadingActions.SetLoading(featureId, true));
-        this._api
-          .runFeature(feature.feature_id, false)
-          .pipe(
-            filter(json => !!json.success),
-            switchMap(_ =>
-              this._store.dispatch(new WebSockets.FeatureTaskQueued(featureId))
-            ),
-            finalize(() =>
-              this._store.dispatch(
-                new LoadingActions.SetLoading(featureId, false)
+
+    if(!feature.depends_on_others){
+      if (isRunning) {
+        // Notify WebSocket Server to send me last websockets of feature
+        this.retrieveLastFeatureSockets(featureId);
+        this.openLiveSteps(featureId);
+      } else {
+        // Check if the feature has at least 1 browser selected, if not, show a warning
+        if (feature.browsers.length > 0) {
+          this._store.dispatch(new LoadingActions.SetLoading(featureId, true));
+          this._api
+            .runFeature(feature.feature_id, false)
+            .pipe(
+              filter(json => !!json.success),
+              switchMap(_ =>
+                this._store.dispatch(new WebSockets.FeatureTaskQueued(featureId))
+              ),
+              finalize(() =>
+                this._store.dispatch(
+                  new LoadingActions.SetLoading(featureId, false)
+                )
               )
             )
-          )
-          .subscribe(
-            _ => {
-              this._snackBar.open(
-                `Feature ${feature.feature_name} is running...`,
-                'OK'
-              );
-              // Make view live steps popup optional
-              // this.openLiveSteps();
-            },
-            err => {
-              this._snackBar.open('An error ocurred', 'OK');
-            }
+            .subscribe(
+              _ => {
+                this._snackBar.open(
+                  `Feature ${feature.feature_name} is running...`,
+                  'OK'
+                );
+                // Make view live steps popup optional
+                // this.openLiveSteps();
+              },
+              err => {
+                this._snackBar.open('An error ocurred', 'OK');
+              }
+            );
+        } else {
+          this._snackBar.open(
+            "This feature doesn't have browsers selected.",
+            'OK'
           );
-      } else {
-        this._snackBar.open(
-          "This feature doesn't have browsers selected.",
-          'OK'
-        );
+        }
       }
     }
   }

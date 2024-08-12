@@ -289,6 +289,10 @@ body::-webkit-scrollbar-corner {
   .run-feature * {
     color: $blue !important;
   }
+  button.run-feature[disabled] {
+    color: #666666;
+    cursor: not-allowed;
+  }
 }
 
 .mat-menu-item {

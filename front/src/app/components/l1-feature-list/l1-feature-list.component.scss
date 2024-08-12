@@ -123,6 +123,14 @@
   }
 }
 
+.items-container {
+  display: flex;
+  flex-direction: row;
+  i {
+    justify-content: start;
+  }
+}
+
 .folderIcon {
   height: 18px;
   min-width: 18px;

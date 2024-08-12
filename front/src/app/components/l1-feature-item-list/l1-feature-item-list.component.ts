@@ -93,6 +93,9 @@ export class L1FeatureItemListComponent implements OnInit {
   canCreateFeature: boolean;
   @Input() feature_id: number;
 
+  // Comprobe if run all feature button is running
+  isRunning: boolean = false;
+
   /**
    * Global variables
    */
@@ -195,12 +198,14 @@ export class L1FeatureItemListComponent implements OnInit {
 
   runAllFeatures(){
     if(this.item.type == 'folder'){
+      this.isRunning = true;
       console.log(this.item);
       console.log(this.item.reference.features);
       for (let i = 0; i < this.item.reference.features.length; i++) {
         this._sharedActions.run(this.item.reference.features[i])
         console.log(i, "running:",this.item.reference.features[i] );
       }
+      this.isRunning = false;
     }
   }
 }

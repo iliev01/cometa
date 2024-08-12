@@ -86,8 +86,18 @@ Author: dph000
     </ng-template>
   </ng-container>
   <!-- Folder icon -->
-  <ng-template #folderIcon>
+  <ng-template #folderIcon class="items-container">
     <i class="folderIcon"></i>
+    <button
+    (click)="runAllFeatures()"
+    class="run-feature"
+    [matTooltip]="'tooltips.run_feature' | translate"
+    matTooltipPosition="after"
+    mat-menu-item
+    [disabled]="isRunning">
+      <mat-icon>play_circle_filled</mat-icon>
+      <span>Run all feat.</span>
+    </button>
   </ng-template>
 </ng-template>
 

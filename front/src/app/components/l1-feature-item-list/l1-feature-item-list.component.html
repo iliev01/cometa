@@ -237,7 +237,8 @@ Author: dph000
         class="run-feature"
         [matTooltip]="'tooltips.run_feature' | translate"
         matTooltipPosition="after"
-        mat-menu-item>
+        mat-menu-item
+        [disabled]="isRunning">
           <mat-icon>play_circle_filled</mat-icon>
           <span>Run all feat.</span>
         </button>

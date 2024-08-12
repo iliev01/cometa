@@ -62,6 +62,7 @@ import {
 } from '@angular/common';
 import { MtxGridModule } from '@ng-matero/extensions/grid';
 import { LetDirective } from '../../directives/ng-let.directive';
+import { L1FeatureItemListComponent } from '@components/l1-feature-item-list/l1-feature-item-list.component';
 
 @Component({
   selector: 'cometa-l1-feature-list',
