@@ -746,8 +746,12 @@ export class ResultsState {
   @ImmutableSelector()
   static GetLastFeatureRunID(state: IResults) {
     return (feature_id: number) => {
-      const keys = Object.keys(state[feature_id].results).map(k => +k);
-      return Math.max(...keys);
+      if (state[feature_id] && state[feature_id].results) {
+        const keys = Object.keys(state[feature_id].results).map(k => +k);
+        console.log("La key: ", keys)
+        return keys.length ? Math.max(...keys) : null;
+      }
+      return null;
     };
   }
 

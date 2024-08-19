@@ -3,6 +3,11 @@ import { ElementRef, Injectable, ViewChild } from '@angular/core';
 import { MatLegacyCheckboxChange as MatCheckboxChange } from '@angular/material/legacy-checkbox';
 import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import {
+  MatLegacyDialogRef as MatDialogRef,
+  MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+  MatLegacyDialogModule,
+} from '@angular/material/legacy-dialog';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { LoadingSnack } from '@components/snacks/loading/loading.snack';
@@ -28,7 +33,8 @@ import { StepDefinitions } from '@store/actions/step_definitions.actions';
 import { FeaturesState } from '@store/features.state';
 import { LoadingActions } from '@store/loadings.state';
 import { deepClone } from 'ngx-amvara-toolbox';
-import { from, Observable, of, BehaviorSubject } from 'rxjs';
+import { from, Observable, of, BehaviorSubject, combineLatest } from 'rxjs';
+import { CommunicationService } from './communication.service'; 
 import {
   concatMap,
   delay,
@@ -52,6 +58,8 @@ export class SharedActionsService {
   headers$ = new BehaviorSubject<ResultHeader[]>([]);
   dialogActive: boolean = false;
   dialogActiveOther: boolean = false;
+  public folderRunningStates = new BehaviorSubject<Map<number, boolean>>(new Map());
+  public featuresRunning$ = this.folderRunningStates.asObservable();
 
   constructor(
     public _dialog: MatDialog,
@@ -61,7 +69,8 @@ export class SharedActionsService {
     private _router: Router,
     private _location: Location,
     private _snack: MatSnackBar,
-    private _socket: SocketService
+    private _socket: SocketService,
+    private communicationService: CommunicationService
   ) {
     this._store
       .select(CustomSelectors.RetrieveResultHeaders(false))
@@ -504,4 +513,45 @@ export class SharedActionsService {
       })
     );
   }
+
+  async runAllFeatures(folder: Folder){
+    // Create an array of observables for the running status of each feature in the folder
+    const featureStatuses: Observable<boolean>[] = folder.features.map(feature => 
+      this._store.select(CustomSelectors.GetFeatureRunningStatus(feature))
+    );
+
+    // Create an observable that emits the combined status of all features in the folder
+    const combinedStatus$ = combineLatest(featureStatuses).pipe(
+      map(statuses => statuses.some(status => status))
+    );
+
+    // Update the running state for the folder
+    combinedStatus$.subscribe(isRunning => {
+      const currentStates = this.folderRunningStates.getValue();
+      currentStates.set(folder.folder_id, isRunning);
+      this.folderRunningStates.next(new Map(currentStates));
+    });
+
+    if (folder.features.length <= 0) {
+      this._snackBar.open(`No features available in this folder`, 'OK');
+    } else {
+      await Promise.all(folder.features.map(feature => this.run(feature)));
+       // Update the running state of the folder to false after all executions are finished
+      const currentStates = this.folderRunningStates.getValue();
+      currentStates.set(folder.folder_id, false);
+      this.folderRunningStates.next(new Map(currentStates));
+    }
+  }
+
+  async cancelAllFeatures(folder: Folder) {
+    if (folder.features.length <= 0) {
+      this._snack.open(`No features available in this folder`, 'OK');
+    } else {
+      for (const feature of folder.features) {
+        console.log('Cancelando feature:', feature);
+        await this.communicationService.triggerStopTest(feature);
+      }
+    }
+  }
+  
 }

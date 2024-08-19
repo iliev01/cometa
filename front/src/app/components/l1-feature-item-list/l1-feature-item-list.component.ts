@@ -44,6 +44,7 @@ import {
   AsyncPipe,
   LowerCasePipe,
 } from '@angular/common';
+import { map } from 'rxjs/operators';
 
 
 @Component({
@@ -84,7 +85,7 @@ export class L1FeatureItemListComponent implements OnInit {
     private _dialog: MatDialog,
     private _api: ApiService,
     private _snackBar: MatSnackBar,
-    private log: LogService
+    private log: LogService,
   ) {}
 
   // Receives the item from the parent component
@@ -92,9 +93,6 @@ export class L1FeatureItemListComponent implements OnInit {
   @ViewSelectSnapshot(UserState.GetPermission('create_feature'))
   canCreateFeature: boolean;
   @Input() feature_id: number;
-
-  // Comprobe if run all feature button is running
-  isRunning: boolean = false;
 
   /**
    * Global variables
@@ -104,6 +102,7 @@ export class L1FeatureItemListComponent implements OnInit {
   featureStatus$: Observable<string>;
   canEditFeature$: Observable<boolean>;
   canDeleteFeature$: Observable<boolean>;
+  isAnyFeatureRunning$: Observable<boolean>;
 
   // NgOnInit
   ngOnInit() {
@@ -116,10 +115,16 @@ export class L1FeatureItemListComponent implements OnInit {
     this.featureRunning$ = this._store.select(
       CustomSelectors.GetFeatureRunningStatus(this.feature_id)
     );
+
     // Subscribe to the status message comming from NGXS
     this.featureStatus$ = this._store.select(
       CustomSelectors.GetFeatureStatus(this.feature_id)
     );
+
+    this.isAnyFeatureRunning$ = this._sharedActions.folderRunningStates.asObservable().pipe(
+      map(runningStates => runningStates.get(this.item.id) || false)
+    );
+
     this.canEditFeature$ = this._store.select(
       CustomSelectors.HasPermission('edit_feature', this.feature_id)
     );
@@ -196,16 +201,5 @@ export class L1FeatureItemListComponent implements OnInit {
     this._sharedActions.moveFeature(feature);
   }
 
-  runAllFeatures(){
-    if(this.item.type == 'folder'){
-      this.isRunning = true;
-      console.log(this.item);
-      console.log(this.item.reference.features);
-      for (let i = 0; i < this.item.reference.features.length; i++) {
-        this._sharedActions.run(this.item.reference.features[i])
-        console.log(i, "running:",this.item.reference.features[i] );
-      }
-      this.isRunning = false;
-    }
-  }
+
 }

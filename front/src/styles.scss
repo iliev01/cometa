@@ -289,6 +289,20 @@ body::-webkit-scrollbar-corner {
   .run-feature * {
     color: $blue !important;
   }
+  .folder-running{
+    display: flex;
+    flex-direction: row;
+    padding: 5px 16px 5px;
+    mat-spinner {
+      margin-right: 16px;
+    }
+    span {
+      text-align: left;
+    }
+  }
+  .cancel-feature * {
+    color: #607587 !important;
+  }
   button.run-feature[disabled] {
     color: #666666;
     cursor: not-allowed;

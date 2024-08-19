@@ -103,14 +103,20 @@
   }
   th:first-of-type,
   td:first-of-type {
+    display: flex;
+    flex-direction: row;
     padding-left: 5px;
     &.running {
       width: 40px;
       &.disabled {
         width: 5px;
       }
+    
     }
-    .mat-icon {
+    i {
+      margin-left: 10px;
+    }
+    .mat-icon, i {
       width: 30px;
       height: 30px;
       font-size: 25px;
@@ -123,18 +129,22 @@
   }
 }
 
-.items-container {
-  display: flex;
-  flex-direction: row;
-  i {
-    justify-content: start;
-  }
-}
+
+// .mtx-grid tbody tr td:nth-of-type(1) {
+//   display: flex;
+//   flex-direction: row;
+//   align-items: center;
+//   gap: 8px;
+//   background-color: lightblue; /* Añade un color de fondo para verificar visualmente */
+//   border: 1px solid red; /* Añade un borde para verificar visualmente */
+// }
+
+
 
 .folderIcon {
   height: 18px;
   min-width: 18px;
-  flex: 0 18px;
+  // flex: 0 0 18px;
   background-image: url(^assets/icons/folder.svg);
   background-repeat: no-repeat;
   background-position: center;

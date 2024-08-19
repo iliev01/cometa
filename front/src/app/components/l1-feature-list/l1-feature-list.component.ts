@@ -63,6 +63,7 @@ import {
 import { MtxGridModule } from '@ng-matero/extensions/grid';
 import { LetDirective } from '../../directives/ng-let.directive';
 import { L1FeatureItemListComponent } from '@components/l1-feature-item-list/l1-feature-item-list.component';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'cometa-l1-feature-list',
@@ -99,6 +100,7 @@ import { L1FeatureItemListComponent } from '@components/l1-feature-item-list/l1-
     HasPermissionPipe,
     DepartmentNamePipe,
     FeatureRunningPipe,
+    L1FeatureItemListComponent
   ],
 })
 export class L1FeatureListComponent implements OnInit {
@@ -108,7 +110,7 @@ export class L1FeatureListComponent implements OnInit {
     private _dialog: MatDialog,
     private _api: ApiService,
     private _snackBar: MatSnackBar,
-    private log: LogService
+    private log: LogService,
   ) {}
 
   @Input() data$: any; // Contains the new structure of the features / folders
@@ -120,6 +122,7 @@ export class L1FeatureListComponent implements OnInit {
   canCreateFeature: boolean;
   @ViewSelectSnapshot(UserState.HasOneActiveSubscription)
   hasSubscription: boolean;
+  @ViewChild('featureItemList') featureItemList!: L1FeatureItemListComponent;
   @Output() closeAdd: EventEmitter<any> = new EventEmitter();
   // Checks which is the currently stored features pagination
   @Select(CustomSelectors.GetConfigProperty('co_features_pagination'))
@@ -182,9 +185,18 @@ export class L1FeatureListComponent implements OnInit {
     new MatTableDataSource<any>([])
   );
 
+  isAnyFeatureRunning$: Observable<boolean>;
+
   ngOnInit() {
     this.log.msg('1', 'Inicializing component...', 'feature-list');
 
+    this.data$.subscribe(data => {
+      data.rows.forEach(row => {
+        console.log(row);
+      });
+    });
+
+    console.log(this.data$);
     // Initialize the co_features_pagination variable in the local storage
     this.log.msg('1', 'Loading feature pagination...', 'feature-list');
     this.featuresPagination$.subscribe(value =>
@@ -193,6 +205,15 @@ export class L1FeatureListComponent implements OnInit {
 
     // load column settings
     this.getSavedColumnSettings();
+
+    // this.isAnyFeatureRunning$ = this.data$.pipe(
+    //   map(data => data.map(row => {
+    //     const folderId = row.folder_id;
+    //     return this._sharedActions.folderRunningStates.asObservable().pipe(
+    //       map(runningStates => runningStates.get(folderId) || false)
+    //     );
+    //   }))
+    // );
   }
 
   /**

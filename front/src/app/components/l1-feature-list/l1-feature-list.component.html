@@ -67,7 +67,8 @@ Author: dph000
       class="exec-feature-loading"
       diameter="20"
       color="primary"
-      *ngIf="row.id | loading | async; else runButtons"></mat-spinner>
+      *ngIf="row.id | loading | async; else runButtons">
+    </mat-spinner>
     <ng-template #runButtons>
       <div *ngLet="row.id | featureRunning | async as running">
         <button
@@ -76,10 +77,12 @@ Author: dph000
           (click)="SArunFeature(row.id)"
           mat-icon-button>
           <mat-icon color="primary">
-            <ng-container *ngIf="running; else runIcon"
-              >remove_red_eye</ng-container
-            >
-            <ng-template #runIcon>play_circle_filled</ng-template>
+            <ng-container *ngIf="running; else runIcon">
+              remove_red_eye
+            </ng-container>
+            <ng-template #runIcon>
+              play_circle_filled
+            </ng-template>
           </mat-icon>
         </button>
       </div>
@@ -89,15 +92,30 @@ Author: dph000
   <ng-template #folderIcon class="items-container">
     <i class="folderIcon"></i>
     <button
-    (click)="runAllFeatures()"
-    class="run-feature"
+    *ngIf="isAnyFeatureRunning$ | async; else showRunAllButton"
+    (click)="_sharedActions.runAllFeatures(row.reference)"
+    class="exec-feature-loading"
     [matTooltip]="'tooltips.run_feature' | translate"
     matTooltipPosition="after"
     mat-menu-item
-    [disabled]="isRunning">
+    >
       <mat-icon>play_circle_filled</mat-icon>
-      <span>Run all feat.</span>
+      <span>Run all features</span>
     </button>
+    <ng-template #showRunAllButton>
+      <button
+      (click)="_sharedActions.runAllFeatures(row.reference)"
+      class="exec-feature-loading"
+      [matTooltip]="'tooltips.run_feature' | translate"
+      matTooltipPosition="after"
+      mat-menu-item
+      [disabled]="isRunning">
+        <mat-spinner
+        class="item-loader"
+        diameter="18"></mat-spinner>
+        <span> Features running </span>
+      </button>
+    </ng-template>
   </ng-template>
 </ng-template>
 
@@ -220,6 +238,7 @@ Author: dph000
     <div>
       {{ row.department | departmentName }}
     </div>
+    hola
   </ng-template>
 </ng-template>
 
