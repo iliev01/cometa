@@ -45,7 +45,7 @@ import { MatLegacyTooltipModule } from '@angular/material/legacy-tooltip';
 import { MatIconModule } from '@angular/material/icon';
 import { LetDirective } from '../../directives/ng-let.directive';
 import { MatLegacyTabsModule } from '@angular/material/legacy-tabs';
-import { CommunicationService } from '@services/communication.service'; 
+
 import {
   NgIf,
   NgFor,
@@ -108,7 +108,6 @@ export class LiveStepsComponent implements OnInit, OnDestroy {
     private _actions$: Actions,
     private _api: ApiService,
     private _snack: MatSnackBar,
-    private _communicationService: CommunicationService
   ) {
     this.status$ = this._store.select(
       CustomSelectors.GetFeatureStatus(this.feature_id)
@@ -184,21 +183,6 @@ export class LiveStepsComponent implements OnInit, OnDestroy {
           }
         }
       });
-    
-    console.log('Inicializando suscripción stopTest$');
-
-    this._communicationService.stopTest$.pipe(
-      untilDestroyed(this)
-    ).subscribe(featureId => {
-      console.log(featureId + " <- La id del servicio - La del compo -> " + this.feature_id)
-      if (featureId === this.feature_id) {
-        this.stopTest();
-      }
-    });
-
-    // console.log('CommunicationService inyectado:', this._communicationService);
-
-    // console.log('stopTest$ observable:', this._communicationService.stopTest$);
 
   }
 

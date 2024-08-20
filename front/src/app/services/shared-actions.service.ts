@@ -34,7 +34,7 @@ import { FeaturesState } from '@store/features.state';
 import { LoadingActions } from '@store/loadings.state';
 import { deepClone } from 'ngx-amvara-toolbox';
 import { from, Observable, of, BehaviorSubject, combineLatest } from 'rxjs';
-import { CommunicationService } from './communication.service'; 
+
 import {
   concatMap,
   delay,
@@ -70,7 +70,6 @@ export class SharedActionsService {
     private _location: Location,
     private _snack: MatSnackBar,
     private _socket: SocketService,
-    private communicationService: CommunicationService
   ) {
     this._store
       .select(CustomSelectors.RetrieveResultHeaders(false))
@@ -543,15 +542,14 @@ export class SharedActionsService {
     }
   }
 
-  async cancelAllFeatures(folder: Folder) {
-    if (folder.features.length <= 0) {
-      this._snack.open(`No features available in this folder`, 'OK');
-    } else {
-      for (const feature of folder.features) {
-        console.log('Cancelando feature:', feature);
-        await this.communicationService.triggerStopTest(feature);
-      }
-    }
-  }
+  // async cancelAllFeatures(folder: Folder) {
+  //   if (folder.features.length <= 0) {
+  //     this._snack.open(`No features available in this folder`, 'OK');
+  //   } else {
+  //     for (const feature of folder.features) {
+  //       LiveStepsComponent.stoptest();
+  //     }
+  //   }
+  // }
   
 }

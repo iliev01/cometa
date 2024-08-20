@@ -64,6 +64,7 @@ import { MtxGridModule } from '@ng-matero/extensions/grid';
 import { LetDirective } from '../../directives/ng-let.directive';
 import { L1FeatureItemListComponent } from '@components/l1-feature-item-list/l1-feature-item-list.component';
 import { map } from 'rxjs/operators';
+import { data } from 'jquery';
 
 @Component({
   selector: 'cometa-l1-feature-list',
@@ -138,6 +139,7 @@ export class L1FeatureListComponent implements OnInit {
    * The format is due to mtx-grid. To see more go to https://ng-matero.github.io/extensions/components/data-grid/overview
    */
   columns = [
+    { header: 'Options', field: 'reference' },
     { header: 'Type / Run', field: 'orderType', sortable: true },
     { header: 'ID', field: 'id', sortable: true },
     {
@@ -166,8 +168,7 @@ export class L1FeatureListComponent implements OnInit {
     // #3427 -------------------------------------------------------- start
 
     { header: 'Browsers', field: 'browsers', sortable: true },
-    { header: 'Schedule', field: 'schedule', sortable: true },
-    { header: 'Options', field: 'reference' },
+    { header: 'Schedule', field: 'schedule', sortable: true }
   ];
 
   // Mtx-grid row selection checkbox options
@@ -185,18 +186,11 @@ export class L1FeatureListComponent implements OnInit {
     new MatTableDataSource<any>([])
   );
 
-  isAnyFeatureRunning$: Observable<boolean>;
+  public isAnyFeatureRunningMap: Map<number, Observable<boolean>> = new Map();
 
   ngOnInit() {
     this.log.msg('1', 'Inicializing component...', 'feature-list');
-
-    this.data$.subscribe(data => {
-      data.rows.forEach(row => {
-        console.log(row);
-      });
-    });
-
-    console.log(this.data$);
+  
     // Initialize the co_features_pagination variable in the local storage
     this.log.msg('1', 'Loading feature pagination...', 'feature-list');
     this.featuresPagination$.subscribe(value =>
@@ -206,14 +200,16 @@ export class L1FeatureListComponent implements OnInit {
     // load column settings
     this.getSavedColumnSettings();
 
-    // this.isAnyFeatureRunning$ = this.data$.pipe(
-    //   map(data => data.map(row => {
-    //     const folderId = row.folder_id;
-    //     return this._sharedActions.folderRunningStates.asObservable().pipe(
-    //       map(runningStates => runningStates.get(folderId) || false)
-    //     );
-    //   }))
-    // );
+    this.data$.rows.forEach(row => {
+      const folderId = row.reference.folder_id;
+  
+      const isRunning$ = this._sharedActions.folderRunningStates.asObservable().pipe(
+        map(runningStates => runningStates.get(folderId) || false)
+      );
+  
+      this.isAnyFeatureRunningMap.set(folderId, isRunning$);
+    });
+    
   }
 
   /**

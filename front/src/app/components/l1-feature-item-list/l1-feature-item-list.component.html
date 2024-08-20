@@ -231,27 +231,24 @@ Author: dph000
       </button>
       <!-- Menu to manage folder -->
     <mat-menu class="folderOptionsMenu" #folderOptions="matMenu">
-    <!-- Mostrar el spinner si algún feature está en running -->
       <div
         *ngIf="isAnyFeatureRunning$ | async; else showRunAllButton"
         class="folder-running"
-        stopPropagation
-        [class.running]="running">
+        [matTooltip]="'tooltips.run_feature' | translate"
+        matTooltipPosition="after"
+        stopPropagation>
         <mat-spinner
           class="item-loader"
           diameter="18"></mat-spinner>
         <span> Features running </span>
       </div>
-      <!-- Template que muestra el botón Run all features cuando isAnyFeatureRunning$ es false -->
       <ng-template #showRunAllButton>
         <button
           (click)="_sharedActions.runAllFeatures(item.reference)"
           class="run-feature"
           [matTooltip]="'tooltips.run_all_features' | translate"
           matTooltipPosition="after"
-          mat-menu-item
-          [disabled]="false"
-        >
+          mat-menu-item>
           <mat-icon>play_circle_filled</mat-icon>
           <span>Run all features</span>
         </button>
