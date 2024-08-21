@@ -33,7 +33,8 @@ import { StepDefinitions } from '@store/actions/step_definitions.actions';
 import { FeaturesState } from '@store/features.state';
 import { LoadingActions } from '@store/loadings.state';
 import { deepClone } from 'ngx-amvara-toolbox';
-import { from, Observable, of, BehaviorSubject, combineLatest } from 'rxjs';
+import { from, Observable, of, BehaviorSubject, combineLatest, Subject } from 'rxjs';
+import { StopFeaturesService } from '@services/stopFeatures.service';
 
 import {
   concatMap,
@@ -58,8 +59,12 @@ export class SharedActionsService {
   headers$ = new BehaviorSubject<ResultHeader[]>([]);
   dialogActive: boolean = false;
   dialogActiveOther: boolean = false;
+
   public folderRunningStates = new BehaviorSubject<Map<number, boolean>>(new Map());
+
   public featuresRunning$ = this.folderRunningStates.asObservable();
+
+  @ViewChild(LiveStepsComponent) liveStepsComponent!: LiveStepsComponent;
 
   constructor(
     public _dialog: MatDialog,
@@ -70,6 +75,7 @@ export class SharedActionsService {
     private _location: Location,
     private _snack: MatSnackBar,
     private _socket: SocketService,
+    private _stopFeaturesService: StopFeaturesService
   ) {
     this._store
       .select(CustomSelectors.RetrieveResultHeaders(false))
@@ -542,12 +548,24 @@ export class SharedActionsService {
     }
   }
 
+  // Next update 2.8.77 config.json
   // async cancelAllFeatures(folder: Folder) {
   //   if (folder.features.length <= 0) {
-  //     this._snack.open(`No features available in this folder`, 'OK');
+  //     this._snack.open('No features available in this folder', 'OK');
   //   } else {
   //     for (const feature of folder.features) {
-  //       LiveStepsComponent.stoptest();
+  //       const dialogRef = this._dialog.open(LiveStepsComponent, {
+  //         data: feature,
+  //         panelClass: 'hidden-dialog'
+  //       });
+  
+  //       dialogRef.afterOpened().subscribe(() => {
+  //         const dialogContainer = document.querySelector('.mat-dialog-container');
+  //         if (dialogContainer) {
+  //           dialogContainer.setAttribute('style', 'opacity: 0; height: 0; width: 0; overflow: hidden;');
+  //         }
+  //         dialogRef.componentInstance.stopTest();
+  //       });
   //     }
   //   }
   // }

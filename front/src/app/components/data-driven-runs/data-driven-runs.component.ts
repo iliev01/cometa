@@ -106,7 +106,6 @@ export class DataDrivenRunsComponent implements OnInit {
           color: 'warn',
           click: (result: DataDrivenRun) => {
             this.stop_data_driven(result, this);
-            console.log(result.running);
           },
           iif: (result: DataDrivenRun) => result.running,
         },
