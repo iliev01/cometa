@@ -199,9 +199,11 @@ export class L1LandingComponent implements OnInit {
 
   ngOnInit() {    
 
+
     this.data$.subscribe(
       (data) => {
         if (data && data.rows) {
+          console.log(data);
           this.table_of_items = data.rows;
           this.table_of_items.sort((itemA, itemB) => {
             const nameA = itemA.name.toLowerCase();

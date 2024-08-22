@@ -338,6 +338,26 @@ export class L1FilterComponent implements OnInit {
     );
   }
 
+  navigateToFeatureFolder(feature: Feature) {
+    this.log.msg('1', `Navigating to folder containing feature ${feature.app_name}...`, 'filter');
+    
+    const folder = this.getFolderByFeatureId(feature.feature_id);
+    
+    if (folder) {
+      this.returnFolder(folder);
+    } else {
+      this.log.msg('2', `Folder not found for feature ${feature.app_name}.`, 'filter');
+    }
+  }
+
+  getFolderByFeatureId(featureId: number): Partial<Folder> {
+    const folder = this._store.selectSnapshot(state => {
+      return state.features.folders.find(folder => folder.features.includes(featureId));
+    });
+    
+    return folder;
+  }
+
   /**
    * HotKey event listeners
    */

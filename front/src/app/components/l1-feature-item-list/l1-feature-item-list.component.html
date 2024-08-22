@@ -114,13 +114,13 @@ Author: dph000
       </div>
       <div class="schedule-container">
         <div class="schedule-data">
-          <p *ngIf="item.schedule">
+          <p *ngIf="item.schedule" class="schedule-active">
             <ng-container *ngIf="item.date; else noRuns">
               <span [matTooltip]="( 'schedule.last-run' | translate ) + ' ' + (item.date | amParse | amDateFormat: 'hh:mm a')"
-                    matTooltipPosition="above" class="schedule-active">
+                    matTooltipPosition="above">
                 <img alt="schedule url not found" class="schedule-image" src="assets/icons/calendar.svg">
-                <span class="schedule-grey">Schedule:&nbsp;</span> 
-                <span class="schedule-green">{{ item.schedule }}</span>
+                <span>Schedule:&nbsp;</span>
+                <span>{{ item.schedule }}</span>
               </span>
             </ng-container>
             
@@ -128,8 +128,8 @@ Author: dph000
               <span [matTooltip]="'schedule.no-last-run' | translate"
               matTooltipPosition="above" class="schedule-active">
                 <img alt="schedule url not found" class="schedule-image" src="assets/icons/calendar.svg">
-                <span class="schedule-grey">Schedule:&nbsp;</span> 
-                <span class="schedule-green">{{ item.schedule }}</span>
+                <span>Schedule:&nbsp;</span> 
+                <span>{{ item.schedule }}</span>
               </span>
             </ng-template>
           </p>
