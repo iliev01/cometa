@@ -124,6 +124,10 @@ export class L1FilterComponent implements OnInit {
         this._store.dispatch(new Features.SetMoreOrLessSteps(value));
       });
     this.openedSearch$.subscribe(value => (this.finder = value));
+
+    const currentRoute = this._store.snapshot().features.currentRouteNew;
+
+    console.log(currentRoute)
   }
 
   /**
@@ -336,26 +340,6 @@ export class L1FilterComponent implements OnInit {
     return this._store.dispatch(
       new Configuration.SetProperty('co_active_list', listType, true)
     );
-  }
-
-  navigateToFeatureFolder(feature: Feature) {
-    this.log.msg('1', `Navigating to folder containing feature ${feature.app_name}...`, 'filter');
-    
-    const folder = this.getFolderByFeatureId(feature.feature_id);
-    
-    if (folder) {
-      this.returnFolder(folder);
-    } else {
-      this.log.msg('2', `Folder not found for feature ${feature.app_name}.`, 'filter');
-    }
-  }
-
-  getFolderByFeatureId(featureId: number): Partial<Folder> {
-    const folder = this._store.selectSnapshot(state => {
-      return state.features.folders.find(folder => folder.features.includes(featureId));
-    });
-    
-    return folder;
   }
 
   /**

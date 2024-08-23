@@ -5,7 +5,7 @@
  *
  * @author dph000
  */
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ViewChild } from '@angular/core';
 import { Store } from '@ngxs/store';
 import { UserState } from '@store/user.state';
 import { Observable, switchMap, tap, map } from 'rxjs';
@@ -36,6 +36,7 @@ import { StopPropagationDirective } from '../../directives/stop-propagation.dire
 import { MatIconModule } from '@angular/material/icon';
 import { MatLegacyTooltipModule } from '@angular/material/legacy-tooltip';
 import { LetDirective } from '../../directives/ng-let.directive';
+import { Router } from '@angular/router';
 import {
   NgIf,
   NgClass,
@@ -44,6 +45,7 @@ import {
   AsyncPipe,
   LowerCasePipe,
 } from '@angular/common';
+import { L1LandingComponent } from '@components/l1-landing/l1-landing.component';
 
 @Component({
   selector: 'cometa-l1-feature-item-list',
@@ -83,7 +85,7 @@ export class L1FeatureItemListComponent implements OnInit {
     private _dialog: MatDialog,
     private _api: ApiService,
     private _snackBar: MatSnackBar,
-    private log: LogService
+    private log: LogService,
   ) {}
 
   // Receives the item from the parent component
@@ -91,7 +93,9 @@ export class L1FeatureItemListComponent implements OnInit {
   @ViewSelectSnapshot(UserState.GetPermission('create_feature'))
   canCreateFeature: boolean;
   @Input() feature_id: number;
+  @Input() folderId: string;
 
+  @ViewChild(L1LandingComponent) l1LandingComponent: L1LandingComponent;
   /**
    * Global variables
    */
@@ -101,6 +105,7 @@ export class L1FeatureItemListComponent implements OnInit {
   canEditFeature$: Observable<boolean>;
   canDeleteFeature$: Observable<boolean>;
   isAnyFeatureRunning$: Observable<boolean>;
+  departmentFolders$: Observable<Folder[]>;
 
   // NgOnInit
   ngOnInit() {
@@ -127,6 +132,9 @@ export class L1FeatureItemListComponent implements OnInit {
     this.isAnyFeatureRunning$ = this._sharedActions.folderRunningStates.asObservable().pipe(
       map(runningStates => runningStates.get(this.item.id) || false)
     );
+
+    this.departmentFolders$ = this._store.select(CustomSelectors.GetDepartmentFolders());
+
   }
 
   async goLastRun() {
@@ -195,5 +203,47 @@ export class L1FeatureItemListComponent implements OnInit {
   SAmoveFeature(feature: Feature) {
     this.log.msg('1', 'Moving feature...', 'feature-item-list', feature);
     this._sharedActions.moveFeature(feature);
+  }
+
+  goToFolder() {
+    this._sharedActions.getData$().subscribe(data => {
+      console.log(data);
+      
+      let departmentNumber = 0; 
+      let folderHierarchyCount = '';
+
+      const traverseFolders = (folders: Folder[]) => {
+        folders.forEach(folder => {
+          if (folder.folder_id) {
+            folderHierarchyCount += `:${folder.folder_id}`;
+          }
+          
+          if (folder.folders.length > 0) {
+            traverseFolders(folder.folders); 
+          }
+        });
+      };
+
+      this.departmentFolders$.subscribe(departmentFolders => {
+        const department = departmentFolders.find(dept => 
+          dept.name === data.rows[0]?.department
+        );
+
+        if (department) {
+          departmentNumber = department.folder_id;
+
+          if (department.folders.length > 0) {
+            traverseFolders(department.folders); 
+          }
+        } else {
+          console.warn("Departamento no encontrado.");
+        }
+      });
+
+      const url = `https://localhost/debug/#/new/:${departmentNumber}${folderHierarchyCount}`;
+      console.log("URL construida:", url);
+      this._router.navigate([url]);
+    });
+
   }
 }

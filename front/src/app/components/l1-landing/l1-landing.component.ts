@@ -197,13 +197,14 @@ export class L1LandingComponent implements OnInit {
   focusSubscription: Subscription;
   keyboardEventActive = false;
 
-  ngOnInit() {    
+  ngOnInit() {  
 
+    this._sharedActions.algo(this.data$);
 
     this.data$.subscribe(
       (data) => {
         if (data && data.rows) {
-          console.log(data);
+          // console.log(data);
           this.table_of_items = data.rows;
           this.table_of_items.sort((itemA, itemB) => {
             const nameA = itemA.name.toLowerCase();

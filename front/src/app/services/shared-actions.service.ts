@@ -53,6 +53,7 @@ export class SharedActionsService {
   headers$ = new BehaviorSubject<ResultHeader[]>([]);
   dialogActive: boolean = false;
   dialogActiveOther: boolean = false;
+  private data$: Observable<any>;
 
   public folderRunningStates = new BehaviorSubject<Map<number, boolean>>(new Map());
 
@@ -567,4 +568,11 @@ export class SharedActionsService {
   //   }
   // }
 
+  algo(data: Observable<any>) {
+    this.data$ = data;
+  }
+
+  getData$(): Observable<any> {
+    return this.data$;
+  }
 }
