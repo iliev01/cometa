@@ -127,7 +127,11 @@ export class L1FilterComponent implements OnInit {
 
     const currentRoute = this._store.snapshot().features.currentRouteNew;
 
-    console.log(currentRoute)
+    this.currentRoute$.subscribe(route => {
+      console.log("Curent: ", route)
+      
+    }
+    )
   }
 
   /**

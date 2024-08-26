@@ -142,8 +142,15 @@ Author: dph000
         <div 
           class="cont-son-folder"
           (click)="goToFolder()">
-          <i class="folderIcon"
-            ></i>
+          <mat-icon class="domainIcon-1">domain</mat-icon>
+          <div class="absolute-path">
+            <div class="circle-domainIcon-2">
+              <mat-icon class="domainIcon-2">domain</mat-icon>
+            </div>
+            <mat-icon class="chevron">chevron_right</mat-icon>
+            <i class=""></i>
+          </div>
+          <!-- <p class="extra-content">Contenido adicional</p> -->
             <!-- {{ }} -->
         </div>
       </div>
@@ -257,6 +264,29 @@ Author: dph000
       </div>
       <!-- Id of the folder -->
       <div class="feature-id">ID: {{ item.id }}</div>
+      <!-- Search - Go to Folder  -->
+      <div 
+        class="cont-fath-folder"
+        *ngFor="let folder of currentRoute$ | async"
+        (click)="goToFolder(folder)"
+        stopPropagation>
+        {{ folder | json }}
+        <div 
+          class="cont-son-folder"
+         >
+          <mat-icon 
+            class="domainIcon-1">domain</mat-icon>
+          <div class="absolute-path">
+            <div class="circle-domainIcon-2">
+              <mat-icon class="domainIcon-2">domain</mat-icon>
+            </div>
+            <mat-icon class="chevron">chevron_right</mat-icon>
+            <i class=""></i>
+          </div>
+          <!-- <p class="extra-content">Contenido adicional</p> -->
+            <!-- {{ }} -->
+        </div>
+      </div>
       <button
         matTooltip="Folder options"
         matTooltipPosition="above"

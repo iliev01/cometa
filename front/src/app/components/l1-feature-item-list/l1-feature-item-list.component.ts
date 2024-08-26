@@ -6,7 +6,7 @@
  * @author dph000
  */
 import { Component, OnInit, Input, ViewChild } from '@angular/core';
-import { Store } from '@ngxs/store';
+import { Select, Store } from '@ngxs/store';
 import { UserState } from '@store/user.state';
 import { Observable, switchMap, tap, map } from 'rxjs';
 import { CustomSelectors } from '@others/custom-selectors';
@@ -46,6 +46,8 @@ import {
   LowerCasePipe,
 } from '@angular/common';
 import { L1LandingComponent } from '@components/l1-landing/l1-landing.component';
+import { FeaturesState } from '@store/features.state';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'cometa-l1-feature-item-list',
@@ -75,6 +77,7 @@ import { L1LandingComponent } from '@components/l1-landing/l1-landing.component'
     FeatureRunningPipe,
     AsyncPipe,
     LowerCasePipe,
+    CommonModule
   ],
 })
 export class L1FeatureItemListComponent implements OnInit {
@@ -106,6 +109,9 @@ export class L1FeatureItemListComponent implements OnInit {
   canDeleteFeature$: Observable<boolean>;
   isAnyFeatureRunning$: Observable<boolean>;
   departmentFolders$: Observable<Folder[]>;
+  @Select(FeaturesState.GetNewSelectionFolders) currentRoute$: Observable<
+  ReturnType<typeof FeaturesState.GetNewSelectionFolders>
+>;
 
   // NgOnInit
   ngOnInit() {
@@ -133,8 +139,9 @@ export class L1FeatureItemListComponent implements OnInit {
       map(runningStates => runningStates.get(this.item.id) || false)
     );
 
-    this.departmentFolders$ = this._store.select(CustomSelectors.GetDepartmentFolders());
-
+    this.currentRoute$.subscribe( algo => {
+      console.log(algo)
+    })
   }
 
   async goLastRun() {
@@ -205,45 +212,59 @@ export class L1FeatureItemListComponent implements OnInit {
     this._sharedActions.moveFeature(feature);
   }
 
-  goToFolder() {
-    this._sharedActions.getData$().subscribe(data => {
-      console.log(data);
+  goToFolder(folder: Partial<Folder>) {
+    console.log('Clicked folder:', folder);
+  //   this.departmentFolders$ = this._store.select(CustomSelectors.GetDepartmentFolders());
+  //   this._sharedActions.getData$().subscribe(data => {
+  //     console.log(data);
       
-      let departmentNumber = 0; 
-      let folderHierarchyCount = '';
-
-      const traverseFolders = (folders: Folder[]) => {
-        folders.forEach(folder => {
-          if (folder.folder_id) {
-            folderHierarchyCount += `:${folder.folder_id}`;
-          }
+  //     let departmentNumber = 0; 
+  //     let folderHierarchyCount = '';
+      
+  //     const traverseFolders = (folders: Folder[]) => {
+  //       folders.forEach(folder => {
+  //         if (folder.folder_id) {
+  //           console.log("folder.folder_id: ", folder.folder_id);
+  //           folderHierarchyCount += `:${folder.folder_id}`;
+  //           console.log("Current folderHierarchyCount: ", folderHierarchyCount);
+  //         }
           
-          if (folder.folders.length > 0) {
-            traverseFolders(folder.folders); 
-          }
-        });
-      };
+  //         if (folder.folders.length > 0) {
+  //           traverseFolders(folder.folders); 
+  //         }
+  //       });
+  //     };
+      
+  //     // console.log("Traverse: ", traverseFolders);
+      
+  //     this.departmentFolders$.subscribe(departmentFolders => {
+  //       const department = departmentFolders.find(dept => 
+  //         dept.name === data.rows[0]?.department
+  //       );
+  //       console.log("This all dep: ", departmentFolders);
 
-      this.departmentFolders$.subscribe(departmentFolders => {
-        const department = departmentFolders.find(dept => 
-          dept.name === data.rows[0]?.department
-        );
+  //       // console.log("This folder_id second: ", department.folder_id);
 
-        if (department) {
-          departmentNumber = department.folder_id;
+  //       console.log("Department: ", data.rows[0]);
 
-          if (department.folders.length > 0) {
-            traverseFolders(department.folders); 
-          }
-        } else {
-          console.warn("Departamento no encontrado.");
-        }
-      });
-
-      const url = `https://localhost/debug/#/new/:${departmentNumber}${folderHierarchyCount}`;
-      console.log("URL construida:", url);
-      this._router.navigate([url]);
-    });
-
+  //       console.log("Department: ", data.rows[0]?.department);
+        
+  //       if (department) {
+  //         departmentNumber = department.folder_id;
+          
+  //         if (department.folders.length > 0) {
+  //           traverseFolders(department.folders); 
+  //         }
+  //       } else {
+  //         console.warn("Department don't allow.");
+  //       }
+  //     });
+      
+  //     const folderHierarchyCountNumber = Number(folderHierarchyCount);
+      
+  //     const url = `https://localhost/debug/#/new/:${departmentNumber}${folderHierarchyCount}`;
+  //     console.log("URL construida:", url);
+  //     // this._router.navigate([url]);
+  //   });
   }
 }
