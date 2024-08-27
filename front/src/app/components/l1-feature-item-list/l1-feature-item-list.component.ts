@@ -48,6 +48,7 @@ import {
 import { L1LandingComponent } from '@components/l1-landing/l1-landing.component';
 import { FeaturesState } from '@store/features.state';
 import { CommonModule } from '@angular/common';
+import { Console } from 'console';
 
 @Component({
   selector: 'cometa-l1-feature-item-list',
@@ -111,6 +112,7 @@ export class L1FeatureItemListComponent implements OnInit {
   departmentFolders$: Observable<Folder[]>;
   @Select(FeaturesState.GetNewSelectionFolders) currentRoute$: Observable<
   ReturnType<typeof FeaturesState.GetNewSelectionFolders>
+
 >;
 
   // NgOnInit
@@ -139,9 +141,8 @@ export class L1FeatureItemListComponent implements OnInit {
       map(runningStates => runningStates.get(this.item.id) || false)
     );
 
-    this.currentRoute$.subscribe( algo => {
-      console.log(algo)
-    })
+    this.departmentFolders$ = this._store.select(CustomSelectors.GetDepartmentFolders())
+
   }
 
   async goLastRun() {
@@ -212,59 +213,96 @@ export class L1FeatureItemListComponent implements OnInit {
     this._sharedActions.moveFeature(feature);
   }
 
-  goToFolder(folder: Partial<Folder>) {
-    console.log('Clicked folder:', folder);
-  //   this.departmentFolders$ = this._store.select(CustomSelectors.GetDepartmentFolders());
-  //   this._sharedActions.getData$().subscribe(data => {
-  //     console.log(data);
-      
-  //     let departmentNumber = 0; 
-  //     let folderHierarchyCount = '';
-      
-  //     const traverseFolders = (folders: Folder[]) => {
-  //       folders.forEach(folder => {
-  //         if (folder.folder_id) {
-  //           console.log("folder.folder_id: ", folder.folder_id);
-  //           folderHierarchyCount += `:${folder.folder_id}`;
-  //           console.log("Current folderHierarchyCount: ", folderHierarchyCount);
-  //         }
-          
-  //         if (folder.folders.length > 0) {
-  //           traverseFolders(folder.folders); 
-  //         }
-  //       });
-  //     };
-      
-  //     // console.log("Traverse: ", traverseFolders);
-      
-  //     this.departmentFolders$.subscribe(departmentFolders => {
-  //       const department = departmentFolders.find(dept => 
-  //         dept.name === data.rows[0]?.department
-  //       );
-  //       console.log("This all dep: ", departmentFolders);
+  // goToFolder(feature_id: number, folder: Partial<Folder>, path = '') {
+  //   // console.log(this.item.department)
+  //   // console.log(this.item.department_id)
+  //   // Inicializa department_id correctamente si es necesario
+  //   const department_id = this.item.reference.department_id;
+  //   console.log("Folder: ", folder);
 
-  //       // console.log("This folder_id second: ", department.folder_id);
 
-  //       console.log("Department: ", data.rows[0]);
+  //   this.departmentFolders$.subscribe( alldepart => {
+  //     console.log("-->: ", alldepart);
+  //   })
+    
+  //   if (!folder.name) {
+  //     path += `${department_id}`;
+  //   } else {
+  //     path += `:${folder.folder_id}`;
+  //   }
+    
+  //   // console.log("Path Antes: ", path);
+    
+  //   if (folder.features && folder.features.includes(feature_id)) {
+  //     return path;
+  //   }
+  
+  //   // console.log("Todos los folders: ", folder);
+    
 
-  //       console.log("Department: ", data.rows[0]?.department);
-        
-  //       if (department) {
-  //         departmentNumber = department.folder_id;
-          
-  //         if (department.folders.length > 0) {
-  //           traverseFolders(department.folders); 
-  //         }
-  //       } else {
-  //         console.warn("Department don't allow.");
-  //       }
-  //     });
+  //   for (let subfolder of folder.folders) {
+  //     const folderResult = this.goToFolder(feature_id, subfolder, path);
       
-  //     const folderHierarchyCountNumber = Number(folderHierarchyCount);
+  //     if (folderResult) {
+  //       // console.log(folderResult);
+  //       // Actualiza el path y construye la URL
+  //       const url = `/new/${folderResult}`;
+  //       // console.log("Navigating to URL:", url);
       
-  //     const url = `https://localhost/debug/#/new/:${departmentNumber}${folderHierarchyCount}`;
-  //     console.log("URL construida:", url);
-  //     // this._router.navigate([url]);
-  //   });
+  //       // Navega a la URL encontrada
+  //       return this._router.navigate([url]);
+  //     }
+  //   }
+    
+  // }
+
+  goToFolder(feature_id: number, path = ''): void {
+
+    console.log(this.item);
+    const department_id = this.item.reference.department_id;
+    path += `:${department_id}`;
+  
+    this.departmentFolders$.subscribe(
+      alldepartments => {
+        this.findAndNavigate(alldepartments, feature_id, path);
+      },
+      error => {
+        console.error("Error obtaining Departments:", error);
+      }
+    );
   }
+  
+  findAndNavigate(departments: any[], feature_id: number, path: string): void {
+    for (const department of departments) {
+      console.log("Names:", department.name);
+      
+      for (const subfolder of department.folders) {
+        console.log("Sub: ", subfolder);
+        const result = this.processSubfolder(subfolder, feature_id, path);
+        console.log(result);
+        if (result) {
+          const url = `/new/${result}`;
+          console.log("Navigating to URL:", url);
+          this._router.navigate([url]);
+          return;
+        }
+      }
+    }
+  }
+  
+  processSubfolder(folder: any, feature_id: number, path: string): string {
+    if (Array.isArray(folder.features) && folder.features.includes(feature_id)) {
+      return `${path}:${folder.folder_id}`;
+    }
+  
+    if (Array.isArray(folder.folders)) {
+      for (const subfolder of folder.folders) {
+        const result = this.processSubfolder(subfolder, feature_id, path + `:${folder.folder_id}`);
+        if (result) {
+          return result;
+        }
+      }
+    }
+  }
+  
 }

@@ -138,17 +138,25 @@ Author: dph000
       <!-- Search - Go to Folder  -->
       <div 
         class="cont-fath-folder"
+        (click)="goToFolder(item.id, '')"
         stopPropagation>
         <div 
           class="cont-son-folder"
-          (click)="goToFolder()">
-          <mat-icon class="domainIcon-1">domain</mat-icon>
+         >
+          <mat-icon 
+            class="domainIcon-1">domain</mat-icon>
           <div class="absolute-path">
             <div class="circle-domainIcon-2">
               <mat-icon class="domainIcon-2">domain</mat-icon>
             </div>
+            <span> {{ item.department }} </span>
+            <!-- <mat-icon class="chevron">chevron_right</mat-icon>
+            <span> ... </span>
             <mat-icon class="chevron">chevron_right</mat-icon>
-            <i class=""></i>
+            <div class="circle-domainIcon-2">
+              <i class="folder-go-to"></i>
+            </div>
+            <span> El folder</span> -->
           </div>
           <!-- <p class="extra-content">Contenido adicional</p> -->
             <!-- {{ }} -->
@@ -268,9 +276,9 @@ Author: dph000
       <div 
         class="cont-fath-folder"
         *ngFor="let folder of currentRoute$ | async"
-        (click)="goToFolder(folder)"
+        (click)="goToFolder(item.id, folder, '')"
         stopPropagation>
-        {{ folder | json }}
+        <!-- {{ folder.folder_id }} -->
         <div 
           class="cont-son-folder"
          >
@@ -281,7 +289,7 @@ Author: dph000
               <mat-icon class="domainIcon-2">domain</mat-icon>
             </div>
             <mat-icon class="chevron">chevron_right</mat-icon>
-            <i class=""></i>
+            <i class="folder-go-to">folder</i>
           </div>
           <!-- <p class="extra-content">Contenido adicional</p> -->
             <!-- {{ }} -->

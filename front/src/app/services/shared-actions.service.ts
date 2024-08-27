@@ -43,7 +43,7 @@ import {
 } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { SocketService } from './socket.service';
-import { Console } from 'console';
+import { Console, log } from 'console';
 
 /**
  * This service is used to execute function which should be accessible from application and Tour definitions
@@ -83,6 +83,8 @@ export class SharedActionsService {
   set_url_folder_params(currentRoute: any = '') {
     // folder url base
     let folderUrl = '/new/';
+
+    console.log("Mi ruta: ", currentRoute);
 
     // go to newLanding if there are no folder id params in currentRoute
     if (!currentRoute) {

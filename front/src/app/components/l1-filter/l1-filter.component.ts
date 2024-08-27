@@ -124,14 +124,6 @@ export class L1FilterComponent implements OnInit {
         this._store.dispatch(new Features.SetMoreOrLessSteps(value));
       });
     this.openedSearch$.subscribe(value => (this.finder = value));
-
-    const currentRoute = this._store.snapshot().features.currentRouteNew;
-
-    this.currentRoute$.subscribe(route => {
-      console.log("Curent: ", route)
-      
-    }
-    )
   }
 
   /**
