@@ -312,28 +312,41 @@ input {
     }
   }
 
+.parent-container {
+  display: block;
+}
+
+.parent-container.hidden {
+  display: none;
+}
+
+/* Contenedor principal */
 .cont-fath-folder {
-  position: relative;
-  cursor: pointer;
-  transition: width 0.5s ease, left 0.5s ease;
+  position: relative; 
+  width: 100%; 
+  transition: width 0.2s;
 }
 
-.cont-son-folder:hover {
-  width: 520px;
-  // left: 102px;
-}
-
+/* Elemento posicionado */
 .cont-son-folder {
   position: absolute;
-  right: -35px;
-  top: -54px;
+  top: 40px; /* Ajusta la posición vertical */
+  left: 103.5%; 
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
   background-color: #636769b5;
   border-radius: 150px;
   height: 50px;
   width: 50px;
   clip-path: inset(0 50% 0 0);
-  display: flex;
-  align-items: center;
+  transition: width 0.2s;
+}
+
+.cont-son-folder:hover {
+  cursor: default;
+  width: 550px; 
+  transform: translateX(-50%);
 }
 
 .cont-son-folder:hover {
@@ -341,8 +354,19 @@ input {
     opacity: 0;
   }
   .domainIcon-2 {
-    font-size: 22.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16pt;
     margin-left: 0;
+    transition: font-size 0.3s ease;
+  }
+  .domainIcon-2:hover {
+    font-size: 17pt;
+    margin-left: 0;
+  }
+  .folder-go-to {
+    height: 18pt;
   }
   .absolute-path {
     opacity: 1;
@@ -355,8 +379,16 @@ input {
   margin-left: -20px;
   opacity: 0;
   span {
-    font: bold;
-    font-size: 18px;
+    font: unset;
+    font-size: 15px;
+    max-width: 70px;
+    margin-left: 5px;
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  span:nth-of-type(odd) {
+    cursor: pointer; 
   }
 }
 
@@ -370,6 +402,7 @@ input {
   align-items: center;
   align-content: center;
   justify-content: center;
+  cursor: pointer;
 }
 
 .chevron{
@@ -381,17 +414,18 @@ input {
 }
 
 .folder-go-to {
-  height: 18px;
+  // height: 18px;
   min-width: 18px;
   background-image: url(^assets/icons/folder.svg);
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
+  cursor: pointer;
 }
 
 .domainIcon-1, .domainIcon-2{
   opacity: 1;
-  font-size: 22.5px;
+  font-size: 21pt;
   margin-left: 5px;
 }
 
