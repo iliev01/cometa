@@ -99,6 +99,7 @@ export class L1FeatureItemListComponent implements OnInit {
   @Input() folderId: string;
   folderName: string | null = null;
   private hasHandledMouseOver = false;
+  finder: boolean = false;
 
   @ViewChild(L1LandingComponent) l1LandingComponent: L1LandingComponent;
   /**
@@ -144,6 +145,10 @@ export class L1FeatureItemListComponent implements OnInit {
 
     this.departmentFolders$ = this._store.select(CustomSelectors.GetDepartmentFolders())
 
+    this._sharedActions.filterState$.subscribe(isActive => {
+      this.finder = isActive;
+    });
+    
   }
 
   async goLastRun() {
@@ -220,7 +225,57 @@ export class L1FeatureItemListComponent implements OnInit {
     }
     this.hasHandledMouseOver = true;
     this.goToFolder(this.item.id, '', false);
+    this.folderMatch(this.item.id, false);
   }
+
+  folderMatch(folder_id: number, folderNameBoolean: boolean){
+    this.departmentFolders$.subscribe(
+      alldepartments => { 
+        console.log("Alldep: ", alldepartments)
+        const { result, folderName } = this.findFolderAndNavigate(alldepartments, folder_id, '');
+      
+        if (result && folderNameBoolean) {
+          console.log("Folder name found:", folderName);
+          const url = `/new/${result}`;
+          this._router.navigate([url]);
+        }
+      },
+      error => {
+        console.error("Error obtaining Departments:", error);
+      }
+    );
+  }
+
+  findFolderAndNavigate(departments: any[], folder_id: number, path: string): { result: string | null, folderName: string | null } {
+    for (const department of departments) {
+      console.log("Department:", department.name);
+  
+      for (const folder of department.folders) {
+        const { result, folderName } = this.processFolder(folder, folder_id, path, folder.name);
+        if (result) {
+          return { result, folderName };
+        }
+      }
+    }
+    return { result: null, folderName: null };
+  }
+
+  processFolder(folder: any, folder_id: number, path: string, parentFolderName: string): { result: string | null, folderName: string | null } {
+    if (folder.folder_id === folder_id) {
+      console.log("Folder found:", parentFolderName);
+      return { result: `${path}:${folder.folder_id}`, folderName: parentFolderName };
+    }
+  
+    for (const subfolder of folder.folders) {
+      const { result, folderName } = this.processFolder(subfolder, folder_id, path + `:${folder.folder_id}`, folder.name); 
+      if (result) {
+        this.folderName = parentFolderName;
+        return { result, folderName: parentFolderName };
+      }
+    }
+    return { result: null, folderName: null };
+  }
+  
 
   goToDomain(department_id: number) {
     department_id = this.item.reference.department_id;

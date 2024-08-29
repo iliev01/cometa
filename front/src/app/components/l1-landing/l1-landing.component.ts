@@ -199,8 +199,6 @@ export class L1LandingComponent implements OnInit {
 
   ngOnInit() {  
 
-    this._sharedActions.algo(this.data$);
-
     this.data$.subscribe(
       (data) => {
         if (data && data.rows) {

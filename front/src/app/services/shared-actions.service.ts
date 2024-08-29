@@ -570,11 +570,10 @@ export class SharedActionsService {
   //   }
   // }
 
-  algo(data: Observable<any>) {
-    this.data$ = data;
-  }
+  private filterStateSubject = new BehaviorSubject<boolean>(false);
+  filterState$ = this.filterStateSubject.asObservable();
 
-  getData$(): Observable<any> {
-    return this.data$;
+  setFilterState(isActive: boolean) {
+    this.filterStateSubject.next(isActive);
   }
 }

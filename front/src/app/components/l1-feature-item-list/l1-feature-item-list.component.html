@@ -83,6 +83,7 @@ Author: dph000
       </div>
       <!-- Search - Go to Folder  -->
       <div 
+        *ngIf="finder"
         class="parent-container"
         (mouseover)="handleMouseOver($event)">
         <div 
@@ -269,6 +270,7 @@ Author: dph000
   <div class="folder-container" (click)="goFolder(item.route)">
     <div class="wrapper folder">
       <div 
+        *ngIf="finder"
         class="parent-container"
         (mouseover)="handleMouseOver($event)">
         <div 
@@ -290,9 +292,9 @@ Author: dph000
               <div class="circle-domainIcon-2">
                 <i 
                 class="folder-go-to"
-                (click)="goToFolder(item.id, '')"></i>
+                (click)="folderMatch(item.id)"></i>
               </div>
-              <span (click)="goToFolder(item.id, '', true)"> 
+              <span (click)="folderMatch(item.id)"> 
                 {{ folderName }}
               </span>
             </div>

@@ -12,9 +12,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  EventEmitter,
   HostListener,
   Input,
   OnInit,
+  Output,
 } from '@angular/core';
 import {
   UntypedFormControl,
@@ -90,6 +92,10 @@ export class L1FilterComponent implements OnInit {
     this.inputFocusService.setInputFocus(inputFocus);
   }
 
+  ngOnChanges() {
+    this._sharedActions.setFilterState(this.filters$.length > 0);
+  }
+
   /**
    * Global variables
    */
@@ -123,7 +129,11 @@ export class L1FilterComponent implements OnInit {
       .subscribe(value => {
         this._store.dispatch(new Features.SetMoreOrLessSteps(value));
       });
-    this.openedSearch$.subscribe(value => (this.finder = value));
+    this.openedSearch$.subscribe(value => {
+
+      (this.finder = value)
+      console.log(this.finder);
+    });
   }
 
   /**
