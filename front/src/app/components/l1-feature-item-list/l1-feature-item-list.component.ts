@@ -99,6 +99,7 @@ export class L1FeatureItemListComponent implements OnInit {
   @Input() folderId: string;
   folderName: string | null = null;
   private hasHandledMouseOver = false;
+  private hasHandledMouseOverFolder = false;
   finder: boolean = false;
 
   @ViewChild(L1LandingComponent) l1LandingComponent: L1LandingComponent;
@@ -224,16 +225,24 @@ export class L1FeatureItemListComponent implements OnInit {
       return;
     }
     this.hasHandledMouseOver = true;
+    console.log("Aqui -------------> se ejecuto")
     this.goToFolder(this.item.id, '', false);
+  }
+
+  handleMouseOverFolder(event: MouseEvent): void {
+    if (this.hasHandledMouseOverFolder) {
+      return;
+    }
+    this.hasHandledMouseOverFolder = true;
     this.folderMatch(this.item.id, false);
   }
 
   folderMatch(folder_id: number, folderNameBoolean: boolean){
     this.departmentFolders$.subscribe(
       alldepartments => { 
-        console.log("Alldep: ", alldepartments)
-        const { result, folderName } = this.findFolderAndNavigate(alldepartments, folder_id, '');
-      
+        console.log("All departm: ", alldepartments)
+        const { result, folderName } = this.findFolderAndNavigate(alldepartments, folder_id, '', folderNameBoolean);
+        
         if (result && folderNameBoolean) {
           console.log("Folder name found:", folderName);
           const url = `/new/${result}`;
@@ -242,16 +251,28 @@ export class L1FeatureItemListComponent implements OnInit {
       },
       error => {
         console.error("Error obtaining Departments:", error);
-      }
+       }
     );
   }
 
-  findFolderAndNavigate(departments: any[], folder_id: number, path: string): { result: string | null, folderName: string | null } {
+  findFolderAndNavigate(departments: any[], folder_id: number, path: string, folderNameBoolean): { result: string | null, folderName: string | null } {
     for (const department of departments) {
       console.log("Department:", department.name);
-  
+
       for (const folder of department.folders) {
-        const { result, folderName } = this.processFolder(folder, folder_id, path, folder.name);
+        console.log(folder.folder_id ,"<==>", folder_id)
+
+        if (folder.folder_id === folder_id) {
+          const finalFolderName = folderNameBoolean ? folder.name : department.name;
+          if(!folderNameBoolean){
+            this.folderName = department.name;
+            return;
+          }
+          return { result: `:${department.folder_id}`, folderName: finalFolderName };
+        }
+        
+
+        const { result, folderName } = this.processFolder(folder, folder_id, path, folder.name, department.folder_id);
         if (result) {
           return { result, folderName };
         }
@@ -260,17 +281,21 @@ export class L1FeatureItemListComponent implements OnInit {
     return { result: null, folderName: null };
   }
 
-  processFolder(folder: any, folder_id: number, path: string, parentFolderName: string): { result: string | null, folderName: string | null } {
+  processFolder(folder: any, folder_id: number, path: string, parentFolderName: string, department_id: number): { result: string | null, folderName: string | null } {
     if (folder.folder_id === folder_id) {
       console.log("Folder found:", parentFolderName);
+      console.log("Department id: :", department_id);
+      console.log("The path: ", `${path}`)
+      this.folderName = parentFolderName;
       return { result: `${path}:${folder.folder_id}`, folderName: parentFolderName };
     }
-  
+
     for (const subfolder of folder.folders) {
-      const { result, folderName } = this.processFolder(subfolder, folder_id, path + `:${folder.folder_id}`, folder.name); 
+      const resultPath = `${path}:${folder.folder_id}`;
+      const { result, folderName } = this.processFolder(subfolder, folder_id, resultPath, folder.name, department_id); 
       if (result) {
-        this.folderName = parentFolderName;
-        return { result, folderName: parentFolderName };
+        console.log(folderName)
+        return { result, folderName };
       }
     }
     return { result: null, folderName: null };

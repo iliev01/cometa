@@ -272,7 +272,7 @@ Author: dph000
       <div 
         *ngIf="finder"
         class="parent-container"
-        (mouseover)="handleMouseOver($event)">
+        (mouseover)="handleMouseOverFolder($event)">
         <div 
           class="cont-fath-folder"
           stopPropagation>
@@ -292,9 +292,9 @@ Author: dph000
               <div class="circle-domainIcon-2">
                 <i 
                 class="folder-go-to"
-                (click)="folderMatch(item.id)"></i>
+                (click)="folderMatch(item.id, true)"></i>
               </div>
-              <span (click)="folderMatch(item.id)"> 
+              <span (click)="folderMatch(item.id, true)"> 
                 {{ folderName }}
               </span>
             </div>
