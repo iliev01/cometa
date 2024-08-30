@@ -48,6 +48,7 @@ import { L1LandingComponent } from '@components/l1-landing/l1-landing.component'
 import { FeaturesState } from '@store/features.state';
 import { CommonModule } from '@angular/common';
 import { Console } from 'console';
+// import { Location } from '@angular/common';
 
 @Component({
   selector: 'cometa-l1-feature-item-list',
@@ -89,6 +90,7 @@ export class L1FeatureItemListComponent implements OnInit {
     private _api: ApiService,
     private _snackBar: MatSnackBar,
     private log: LogService,
+    // private _location: Location,
   ) {}
 
   // Receives the item from the parent component
@@ -225,8 +227,7 @@ export class L1FeatureItemListComponent implements OnInit {
       return;
     }
     this.hasHandledMouseOver = true;
-    console.log("Aqui -------------> se ejecuto")
-    this.goToFolder(this.item.id, '', false);
+    this.featuresGoToFolder(this.item.id, '', false);
   }
 
   handleMouseOverFolder(event: MouseEvent): void {
@@ -234,17 +235,16 @@ export class L1FeatureItemListComponent implements OnInit {
       return;
     }
     this.hasHandledMouseOverFolder = true;
-    this.folderMatch(this.item.id, false);
+    this.folderGoToFolder(this.item.id, false);
   }
 
-  folderMatch(folder_id: number, folderNameBoolean: boolean){
+  folderGoToFolder(folder_id: number, folderNameBoolean: boolean){
     this.departmentFolders$.subscribe(
-      alldepartments => { 
-        console.log("All departm: ", alldepartments)
-        const { result, folderName } = this.findFolderAndNavigate(alldepartments, folder_id, '', folderNameBoolean);
+      alldepartments => {
+        const { result, folderName, foldersToOpen } = this.findFolderAndNavigate(alldepartments, folder_id, '', folderNameBoolean);
         
         if (result && folderNameBoolean) {
-          console.log("Folder name found:", folderName);
+          this.openFolderInLocalStorage(foldersToOpen);
           const url = `/new/${result}`;
           this._router.navigate([url]);
         }
@@ -255,50 +255,42 @@ export class L1FeatureItemListComponent implements OnInit {
     );
   }
 
-  findFolderAndNavigate(departments: any[], folder_id: number, path: string, folderNameBoolean): { result: string | null, folderName: string | null } {
+  findFolderAndNavigate(departments: any[], folder_id: number, path: string, folderNameBoolean): { result: string | null, folderName: string | null, foldersToOpen: string[] } {
     for (const department of departments) {
-      console.log("Department:", department.name);
-
       for (const folder of department.folders) {
-        console.log(folder.folder_id ,"<==>", folder_id)
 
         if (folder.folder_id === folder_id) {
           const finalFolderName = folderNameBoolean ? folder.name : department.name;
           if(!folderNameBoolean){
             this.folderName = department.name;
-            return;
           }
-          return { result: `:${department.folder_id}`, folderName: finalFolderName };
+          return { result: `:${department.folder_id}`, folderName: finalFolderName,  foldersToOpen: [department.name, folder.name] };
         }
-        
 
-        const { result, folderName } = this.processFolder(folder, folder_id, path, folder.name, department.folder_id);
+        const { result, folderName, foldersToOpen } = this.processFolder(folder, folder_id, path, folder.name, department.folder_id);
         if (result) {
-          return { result, folderName };
+          return { result, folderName, foldersToOpen: [this.item.department, ...foldersToOpen] };
         }
       }
     }
-    return { result: null, folderName: null };
+    return { result: null, folderName: null, foldersToOpen: [] };
   }
 
-  processFolder(folder: any, folder_id: number, path: string, parentFolderName: string, department_id: number): { result: string | null, folderName: string | null } {
+  processFolder(folder: any, folder_id: number, path: string, parentFolderName: string, department_id: number ): { result: string | null, folderName: string | null, foldersToOpen: string[] } {
+
     if (folder.folder_id === folder_id) {
-      console.log("Folder found:", parentFolderName);
-      console.log("Department id: :", department_id);
-      console.log("The path: ", `${path}`)
       this.folderName = parentFolderName;
-      return { result: `${path}:${folder.folder_id}`, folderName: parentFolderName };
+      return { result: `${path}:${folder.folder_id}`, folderName: parentFolderName,foldersToOpen: [folder.name]  };
     }
 
     for (const subfolder of folder.folders) {
       const resultPath = `${path}:${folder.folder_id}`;
-      const { result, folderName } = this.processFolder(subfolder, folder_id, resultPath, folder.name, department_id); 
+      const { result, folderName, foldersToOpen } = this.processFolder(subfolder, folder_id, resultPath, folder.name, department_id); 
       if (result) {
-        console.log(folderName)
-        return { result, folderName };
+        return { result, folderName, foldersToOpen: [folder.name, ...foldersToOpen] };
       }
     }
-    return { result: null, folderName: null };
+    return { result: null, folderName: null, foldersToOpen: []  };
   }
   
 
@@ -309,17 +301,16 @@ export class L1FeatureItemListComponent implements OnInit {
   }
 
 
-  goToFolder(feature_id: number, path = '', folderNameBoolean: boolean): void {
-    console.log(this.item);
+  featuresGoToFolder(feature_id: number, path = '', folderNameBoolean: boolean): void {
     const department_id = this.item.reference.department_id;
     path += `:${department_id}`;
 
     this.departmentFolders$.subscribe(
       alldepartments => {
-        const { result, folderName } = this.findAndNavigate(alldepartments, feature_id, path);
+        const { result, folderName, foldersToOpen } = this.findAndNavigate(alldepartments, feature_id, path);
         if (result && folderNameBoolean) {
+          this.openFolderInLocalStorage(foldersToOpen);
           const url = `/new/${result}`;
-          console.log("Folder Name:", folderName);
           this._router.navigate([url]);
         }
       },
@@ -329,35 +320,48 @@ export class L1FeatureItemListComponent implements OnInit {
     );
   }
 
-  findAndNavigate(departments: any[], feature_id: number, path: string): { result: string | null, folderName: string | null } {
+  findAndNavigate(departments: any[], feature_id: number, path: string): { result: string | null, folderName: string | null, foldersToOpen: string[] } {
     for (const department of departments) {
-      console.log("Names:", department.name);
-
       for (const subfolder of department.folders) {
-        const { result, folderName } = this.processSubfolder(subfolder, feature_id, path, subfolder.name);
+        const { result, folderName, foldersToOpen } = this.processSubfolder(subfolder, feature_id, path, subfolder.name);
         if (result) {
-          return { result, folderName };
+          return { result, folderName, foldersToOpen: [this.item.department, ...foldersToOpen] };
         }
       }
     }
-    return { result: null, folderName: null };
+    return { result: null, folderName: null, foldersToOpen: [] };
   }
 
-  processSubfolder(folder: any, feature_id: number, path: string, feature_directory: string): { result: string | null, folderName: string | null } {
+  processSubfolder(folder: any, feature_id: number, path: string, feature_directory: string): { result: string | null, folderName: string | null, foldersToOpen: string[] } {
+
     if (folder.features.includes(feature_id)) {
-      console.log("Feature found in folder:", feature_directory);
-      return { result: `${path}:${folder.folder_id}`, folderName: feature_directory };
+      return { result: `${path}:${folder.folder_id}`, folderName: feature_directory,foldersToOpen: [folder.name] };
     }
 
     for (const subfolder of folder.folders) {
-      console.log("Sub: ", subfolder.name);
-      const { result, folderName } = this.processSubfolder(subfolder, feature_id, path + `:${folder.folder_id}`, subfolder.name);
+      const { result, folderName, foldersToOpen } = this.processSubfolder(subfolder, feature_id, path + `:${folder.folder_id}`, subfolder.name);
       if (result) {
         this.folderName = folderName;
-        return { result, folderName };
+        return { result, folderName, foldersToOpen: [folder.name, ...foldersToOpen] };
       }
     }
-    return { result: null, folderName: null };
+    return { result: null, folderName: null, foldersToOpen: [] };
+  }
+
+  openFolderInLocalStorage(foldersToOpen: string[]): void {
+    const storedState = JSON.parse(localStorage.getItem('co_folderState')) || {};
+    let stateUpdated = false;
+
+    foldersToOpen.forEach(folder => {
+      if (!storedState[folder]?.open) {
+        storedState[folder] = { open: true };
+        stateUpdated = true;
+      }
+    });
+
+    if (stateUpdated) {
+      localStorage.setItem('co_folderState', JSON.stringify(storedState));
+    }
   }
   
 }

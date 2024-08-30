@@ -90,13 +90,10 @@ Author: dph000
           class="cont-fath-folder"
           stopPropagation>
           <div class="cont-son-folder">
-            <mat-icon 
-              class="domainIcon-1"
-              (click)="goToDomain(item.reference.department_id)">
-              domain</mat-icon>
             <div class="absolute-path">
               <div class="circle-domainIcon-2">
-                <mat-icon class="domainIcon-2">domain</mat-icon>
+                <mat-icon class="domainIcon-2"
+                (click)="goToDomain(item.reference.department_id)">domain</mat-icon>
               </div>
               <span (click)="goToDomain(item.reference.department_id)"> {{ item.department }} </span>
               <mat-icon class="chevron">chevron_right</mat-icon>
@@ -105,9 +102,9 @@ Author: dph000
               <div class="circle-domainIcon-2">
                 <i 
                 class="folder-go-to"
-                (click)="goToFolder(item.id, '')"></i>
+                (click)="featuresGoToFolder(item.id, '', true)"></i>
               </div>
-              <span (click)="goToFolder(item.id, '', true)"> 
+              <span (click)="featuresGoToFolder(item.id, '', true)"> 
                 {{ folderName }}
               </span>
             </div>
@@ -277,10 +274,6 @@ Author: dph000
           class="cont-fath-folder"
           stopPropagation>
           <div class="cont-son-folder">
-            <mat-icon 
-              class="domainIcon-1"
-              (click)="goToDomain(item.reference.department_id)">
-              domain</mat-icon>
             <div class="absolute-path">
               <div class="circle-domainIcon-2">
                 <mat-icon class="domainIcon-2">domain</mat-icon>
@@ -292,9 +285,9 @@ Author: dph000
               <div class="circle-domainIcon-2">
                 <i 
                 class="folder-go-to"
-                (click)="folderMatch(item.id, true)"></i>
+                (click)="folderGoToFolder(item.id, true)"></i>
               </div>
-              <span (click)="folderMatch(item.id, true)"> 
+              <span (click)="folderGoToFolder(item.id, true)"> 
                 {{ folderName }}
               </span>
             </div>

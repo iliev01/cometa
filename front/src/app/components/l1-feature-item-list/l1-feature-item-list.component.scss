@@ -320,18 +320,17 @@ input {
   display: none;
 }
 
-/* Contenedor principal */
+
 .cont-fath-folder {
   position: relative; 
   width: 100%; 
   transition: width 0.2s;
 }
 
-/* Elemento posicionado */
 .cont-son-folder {
   position: absolute;
-  top: 40px; /* Ajusta la posición vertical */
-  left: 103%; 
+  top: 40px; 
+  left: 103.1%; 
   transform: translateX(-50%);
   display: flex;
   align-items: center;
@@ -341,15 +340,13 @@ input {
   width: 50px;
   clip-path: inset(0 50% 0 0);
   transition: width 0.2s;
+  opacity: 1;
 }
 
 .cont-son-folder:hover {
   cursor: default;
   width: 550px; 
   transform: translateX(-50%);
-}
-
-.cont-son-folder:hover {
   .domainIcon-1 {
     opacity: 0;
   }
@@ -358,18 +355,17 @@ input {
     align-items: center;
     justify-content: center;
     font-size: 16pt;
-    margin-left: 0;
     transition: font-size 0.3s ease;
   }
   .domainIcon-2:hover {
     font-size: 17pt;
-    margin-left: 0;
   }
-  .folder-go-to {
-    height: 18pt;
+  .folder-go-to:hover {
+    transform: scale(1.20);
   }
   .absolute-path {
     opacity: 1;
+    margin-left: 10px;
   }
 }
 
@@ -381,7 +377,7 @@ input {
   span {
     font: unset;
     font-size: 15px;
-    max-width: 70px;
+    max-width: 50px;
     margin-left: 5px;
     white-space: nowrap; 
     overflow: hidden;
@@ -414,7 +410,8 @@ input {
 }
 
 .folder-go-to {
-  // height: 18px;
+  height: 18pt;
+  transition: transform 0.3s ease;
   min-width: 18px;
   background-image: url(^assets/icons/folder.svg);
   background-repeat: no-repeat;
@@ -423,16 +420,8 @@ input {
   cursor: pointer;
 }
 
-.domainIcon-1, .domainIcon-2{
-  opacity: 1;
+.domainIcon-1{
   font-size: 21pt;
-  margin-left: 5px;
 }
-
-// .extra-content {
-//   opacity: 0;
-//   transition: opacity 0.5s ease;
-//   margin-left: 5px;
-// }
 
 }
