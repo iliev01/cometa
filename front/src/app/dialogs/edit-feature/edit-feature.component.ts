@@ -720,6 +720,7 @@ export class EditFeature implements OnInit, OnDestroy {
 
     this.featureForm.valueChanges.subscribe(() => {
       this.variableState$.subscribe(data => {
+        console.log(data);
         this.variables = this.getFilteredVariables(data);
       });
     });
@@ -736,6 +737,9 @@ export class EditFeature implements OnInit, OnDestroy {
       this.departmentSettings$ = this._store.select(
         CustomSelectors.GetDepartmentSettings(featureInfo.department_id)
       );
+      this.departmentSettings$.subscribe( settings => {
+        console.log("Los settings: ", settings);
+      })
       this.browserstackBrowsers.next(featureInfo.browsers);
       this.browsersOriginal = deepClone(featureInfo.browsers);
       this.featureForm.get('run_now').setValue(featureInfo.schedule !== '');
