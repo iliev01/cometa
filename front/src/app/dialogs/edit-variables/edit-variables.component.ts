@@ -17,7 +17,7 @@ import { Select, Store } from '@ngxs/store';
 import { ApiService } from '@services/api.service';
 import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { UserState } from '@store/user.state';
-import { Observable, Subject, takeUntil } from 'rxjs';
+import { map, Observable, Subject, takeUntil } from 'rxjs';
 import { VariablesState } from '@store/variables.state';
 import { Variables } from '@store/actions/variables.actions';
 import { ViewSelectSnapshot } from '@ngxs-labs/select-snapshot';
@@ -52,6 +52,7 @@ import { DraggableWindowModule } from '@modules/draggable-window.module';
 import { MatSelectChange } from '@angular/material/select';
 import { CustomSelectors } from '@others/custom-selectors';
 import { Environments } from '@store/actions/environments.actions';
+import { Features } from '@store/actions/features.actions';
 
 interface PassedData {
   environment_id: number;
@@ -111,6 +112,9 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = [];
   bases: string[] = ['feature', 'environment', 'department'];
   isEditing: boolean = false;
+  departmentChecked = false;
+  featureChecked = false;
+  depAndFeatChecked: boolean = false;
   errors = { name: null, value: null };
   variables: VariablePair[];
   variable_backup: VariablePair;
@@ -130,8 +134,7 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
   canDelete: boolean;
   departments$: Observable<Folder[]>
   departments: Folder[] = [];
-  selectedDepartment: number;
-  
+
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: PassedData,
     private _store: Store,
@@ -165,12 +168,13 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
         ? this.getFilteredVariables(data)
         : this.getAllVariables(data);
       this.dataSource = new MatTableDataSource(this.variables);
-      console.log("Data source: ", this.dataSource.data);
+      // console.log("Data source: ", this.dataSource.data);
 
       this.departments$ = this._store.select(CustomSelectors.GetDepartmentFolders())
 
       this.departments$.pipe(takeUntil(this.destroy$)).subscribe(departments => {
         this.departments = departments;
+        // console.log("This depart: ", this.departments)
       });
       // Inbuilt MatTableDataSource.filterPredicate determines which columns filter term must be applied to
       this.applyFilterPredicate();
@@ -183,11 +187,11 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
     this.displayedColumns = this.allColumns
     .filter(item => item.activated)
     .map(item => item.value);
-    console.log( this.displayedColumns);
-    console.log("This data: ", this.data);
-    console.log("Bases: ", this.bases);
-    console.log("Data source: ", this.dataSource);
-    console.log("Departments: ", this.departments);
+    // console.log( this.displayedColumns);
+    // console.log("This data: ", this.data);
+    // console.log("Bases: ", this.bases);
+    // console.log("Data source: ", this.dataSource);
+    // console.log("Departments: ", this.departments);
   }
 
   ngOnDestroy(): void {
@@ -463,45 +467,45 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
   }
 
   // Asegúrate de que getFilteredVariables filtre correctamente las variables basadas en el departamento
-getFilteredVariablesBySelector(variables: VariablePair[]): VariablePair[] {
-  let reduced = variables.reduce(
-    (filtered_variables: VariablePair[], current: VariablePair) => {
-      // stores variables, if it's id coincides with received department id and it is based on department
-      const byDeptOnly =
-        current.department === this.selectedDepartment &&
-        current.based === 'department'
-          ? current
-          : null;
+  // getFilteredVariablesBySelector(variables: VariablePair[]) {
+  // let reduced = variables.reduce(
+  //   (filtered_variables: VariablePair[], current: VariablePair) => {
+  //     // stores variables, if it's id coincides with received department id and it is based on department
+  //     const byDeptOnly =
+  //       current.department === this.selectedDepartment &&
+  //       current.based === 'department'
+  //         ? current
+  //         : null;
 
-      // stores variable if department id coincides with received department id and
-      // environment or feature ids coincide with received ones, additionally if feature id coincides variable must be based on feature. If environment id coincides, variables must be based on environment.
-      const byEnv =
-        current.department === this.selectedDepartment &&
-        ((current.environment === this.data.environment_id &&
-          current.based === 'environment') ||
-          (current.feature === this.data.feature_id &&
-            current.based === 'feature'))
-          ? current
-          : null;
+  //     // stores variable if department id coincides with received department id and
+  //     // environment or feature ids coincide with received ones, additionally if feature id coincides variable must be based on feature. If environment id coincides, variables must be based on environment.
+  //     const byEnv =
+  //       current.department === this.selectedDepartment &&
+  //       ((current.environment === this.data.environment_id &&
+  //         current.based === 'environment') ||
+  //         (current.feature === this.data.feature_id &&
+  //           current.based === 'feature'))
+  //         ? current
+  //         : null;
 
-      // pushes stored variables into array if they have value
-      byDeptOnly ? filtered_variables.push(byDeptOnly) : null;
-      byEnv ? filtered_variables.push(byEnv) : null;
+  //     // pushes stored variables into array if they have value
+  //     byDeptOnly ? filtered_variables.push(byDeptOnly) : null;
+  //     byEnv ? filtered_variables.push(byEnv) : null;
 
-      // removes duplicated variables and returs set like array
-      return filtered_variables.filter(
-        (value, index, self) =>
-          index === self.findIndex(v => v.id === value.id)
-      );
-    },
-    []
-  );
-   // disables every table row, except the one that is newly created in is still not saved in db
-   const clone = reduced.map((item: VariablePair) => {
-    return { ...item, disabled: item.id === 0 ? false : true };
-  });
-  return clone;
-}
+  //     // removes duplicated variables and returs set like array
+  //     return filtered_variables.filter(
+  //       (value, index, self) =>
+  //         index === self.findIndex(v => v.id === value.id)
+  //     );
+  //   },
+  //   []
+  // );
+  // // disables every table row, except the one that is newly created in is still not saved in db
+  // const clone = reduced.map((item: VariablePair) => {
+  //   return { ...item, disabled: item.id === 0 ? false : true };
+  // });
+  // return clone;
+  // }
 
   // just disables table rows, filters are not applied. This only happens when template is displayed as child component instead of dialog
   getAllVariables(variables: VariablePair[]) {
@@ -535,51 +539,91 @@ getFilteredVariablesBySelector(variables: VariablePair[]): VariablePair[] {
     new_var.in_use = [];
     new_var.disabled = false;
 
+    console.log("New var: ", new_var);
+
     this._store.dispatch(new Variables.UpdateOrCreateVariable(new_var));
     this.isEditing = true;
   }
+    
 
-  environments$: Observable<Environment[]>;
-  environments: Environment[] = [];
   showSelect: boolean = false;
+  selectedDepartment: { id: number, name: string } = { 
+    id: null, 
+    name: '' 
+  };
+
+  selectedFeature: { id: number, name: string,  id_enviornment: number, name_environment: string  } = { 
+    id: null, 
+    name: '',
+    id_enviornment: null, 
+    name_environment: '',
+  };
+
+  features$: Observable<any[]>;
+  allFeatures: any[] = []
 
   startFunctions(){
-    this.getEnvironments();
     this.createNewVarInstanceBySelector();
+    this.applyValidators();
+    this.isEditing = true;
+
+    // scrolls up to top and focus new variable row
+    setTimeout(() => {
+      this.tableWrapper.nativeElement.scrollTo(0, 0);
+      document.getElementById('name-0').focus();
+    }, 0);
   }
 
-  getEnvironments(){
-    this._store.dispatch(new Environments.GetEnvironments()).subscribe(() => {
-      this.environments$ = this._store.select(state => state.environments);
-      this.environments$.subscribe(environments => {
-        this.environments = environments;
-        console.log('Environments: ', environments);
-      });
+  onDepartmentSelect($event){
+    console.log(this.selectedDepartment);
+    this._store.dispatch(new Features.GetFeatures()).subscribe(() => {
+      // Selecciona la parte correcta del estado
+      this.features$ = this._store.select(state => state.features.details);
+      this.features$.pipe(
+        map(features => {
+          console.log(features, this.selectedDepartment);
+          const featuresArray = Object.values(features);
+          this.allFeatures = featuresArray.filter(feature => feature.department_id == this.selectedDepartment.id);
+          console.log("Filtered Features:", this.allFeatures);
+        })
+      ).subscribe();
     });
+    this.departmentChecked = true;
   }
 
+  onFeatureSelect($event){
+    this.featureChecked = true;
+    this.checkDoubleSelect();
+    // this.createNewVarInstanceBySelector();
+  }
+
+  checkDoubleSelect() {
+    if(this.departmentChecked && this.featureChecked){
+      this.depAndFeatChecked = true;
+    }
+  }
+  
   createNewVarInstanceBySelector() {
     const new_var = <VariablePair>{};
 
-    console.log("This data: ", this.data);
+    new_var.id = 0;
+    new_var.department = this.selectedDepartment.id;
+    new_var.environment = this.selectedFeature.id_enviornment;
+    new_var.department_name = this.selectedDepartment.name;
+    new_var.environment_name = this.selectedFeature.name_environment;
+    new_var.feature_name = this.selectedFeature.name;
+    new_var.feature = this.data.feature_id === 0 ? null : this.selectedFeature.id;
+    new_var.variable_name = '';
+    new_var.variable_value = '';
+    new_var.encrypted = false;
+    new_var.based = this.data.feature_id === 0 ? 'department' : 'feature';
+    new_var.in_use = [];
+    new_var.disabled = false;
 
-    // new_var.id = 0;
-    // new_var.department = this.data.department_id;
-    // new_var.environment = 
-    // new_var.department_name = this.data.department_name;
-    // new_var.environment_name = this.data.environment_name;
-    // new_var.feature_name = this.data.feature_name;
-    // new_var.feature = this.data.feature_id === 0 ? null : this.data.feature_id;
-    // new_var.variable_name = '';
-    // new_var.variable_value = '';
-    // new_var.encrypted = false;
-    // new_var.based = this.data.feature_id === 0 ? 'department' : 'feature';
-    // new_var.in_use = [];
-    // new_var.disabled = false;
+    console.log("New var: ", new_var);
     
-    // this._store.dispatch(new Variables.UpdateOrCreateVariable(new_var));
-    // this.isEditing = true;
-    this.showSelect = true;
+    this._store.dispatch(new Variables.UpdateOrCreateVariable(new_var));
+    this.isEditing = true;
   }
   
   // subscribes to XHR actions and treats returned infromation
@@ -610,18 +654,4 @@ getFilteredVariablesBySelector(variables: VariablePair[]): VariablePair[] {
     };
   }
 
-  onDepartmentSelect(event: MatSelectChange) {
-    console.log(event.value);
-    this.selectedDepartment = event.value;
-    this.data.department_id = this.selectedDepartment;
-
-    // Luego puedes filtrar o cargar las variables basadas en el departamento seleccionado
-    this.loadVariables(this.variables);
-  }
-
-  loadVariables(variables: VariablePair[]) {
-    // Filtra las variables basadas en el departamento seleccionado
-    this.variables = this.getFilteredVariablesBySelector(variables);
-    this.dataSource = new MatTableDataSource(this.variables);
-  }
 }

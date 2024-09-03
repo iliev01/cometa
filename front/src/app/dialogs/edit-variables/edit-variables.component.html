@@ -39,19 +39,32 @@
       <button mat-stroked-button [matMenuTriggerFor]="selectedColumns">
         Columns Shown
       </button>
-      <mat-form-field *ngIf="!data.department_id" class="select-department">
-        <mat-label>Select Department</mat-label>
-        <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="onDepartmentSelect($event)">
-          <mat-option *ngFor="let department of departments" [value]="department.folder_id">
-            {{ department.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+      <ng-container>
+        <mat-form-field>
+          <mat-label>Select Department</mat-label>
+          <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="onDepartmentSelect($event)">
+            <mat-option *ngFor="let department of departments" [value]="{ id: department.folder_id, name: department.name}">
+              {{ department.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </ng-container>
+      <ng-container>
+        <mat-form-field>
+          <mat-select [(ngModel)]="selectedFeature" placeholder="Select Feature"
+          (selectionChange)="onFeatureSelect($event)"
+          [disabled]="!departmentChecked">
+            <mat-option *ngFor="let feature of allFeatures" [value]="{ id: feature.feature_id, name: feature.feature_name, id_enviornment: feature.environment_id, name_environment: feature.environment_name }">
+              {{ feature.feature_name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </ng-container>
       <button
       color="primary"
       (click)="startFunctions()"
       class="add"
-      [disabled]="isEditing"
+      [disabled]="isEditing || !depAndFeatChecked"
       mat-stroked-button>
       Add variable
       </button>
@@ -163,20 +176,9 @@
     </ng-container>
     <ng-container matColumnDef="environment_name">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Environment</th>
-        <td mat-cell *matCellDef="let element">
-          <ng-container *ngIf="showSelect">
-            <mat-form-field>
-              <mat-select [(ngModel)]="element.environment_id" placeholder="Select environment">
-                <mat-option *ngFor="let env of environments" [value]="env.id">
-                  {{ env.environment_name }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </ng-container>
-          <ng-container *ngIf="!showSelect">
-            <p>{{ element?.environment_name }}</p>
-          </ng-container>
-        </td>
+          <td mat-cell *matCellDef="let element">
+            <p disabled>{{ element?.environment_name }}</p>
+          </td>
         </ng-container>
         <ng-container matColumnDef="feature_name">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Feature</th>
