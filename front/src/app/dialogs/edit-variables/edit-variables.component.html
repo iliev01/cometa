@@ -42,7 +42,8 @@
       <ng-container>
         <mat-form-field>
           <mat-label>Select Department</mat-label>
-          <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="onDepartmentSelect($event)">
+          <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="onDepartmentSelect($event)"
+          [disabled]="selectionsDisabled">
             <mat-option *ngFor="let department of departments" [value]="{ id: department.folder_id, name: department.name}">
               {{ department.name }}
             </mat-option>
@@ -53,7 +54,7 @@
         <mat-form-field>
           <mat-select [(ngModel)]="selectedFeature" placeholder="Select Feature"
           (selectionChange)="onFeatureSelect($event)"
-          [disabled]="!departmentChecked">
+          [disabled]="!departmentChecked || selectionsDisabled">
             <mat-option *ngFor="let feature of allFeatures" [value]="{ id: feature.feature_id, name: feature.feature_name, id_enviornment: feature.environment_id, name_environment: feature.environment_name }">
               {{ feature.feature_name }}
             </mat-option>
@@ -64,7 +65,7 @@
       color="primary"
       (click)="startFunctions()"
       class="add"
-      [disabled]="isEditing || !depAndFeatChecked"
+      [disabled]="!depAndFeatChecked"
       mat-stroked-button>
       Add variable
       </button>
@@ -99,7 +100,7 @@
             <input
               #variable_name="ngModel"
               id="name-{{ element.id }}"
-              [disabled]="element.disabled || !data.department_id"
+              [disabled]="element.disabled"
               [type]="text"
               [(ngModel)]="element.variable_name"
               (input)="setInputStatus(variable_name?.errors, 'name')"

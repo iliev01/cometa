@@ -7,6 +7,7 @@ import {
   ViewChild,
   OnDestroy,
   ElementRef,
+  HostListener,
 } from '@angular/core';
 import {
   MatLegacyDialog as MatDialog,
@@ -49,10 +50,9 @@ import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { NgIf, NgFor } from '@angular/common';
 import { InputFocusService } from '@services/inputFocus.service'; 
 import { DraggableWindowModule } from '@modules/draggable-window.module';
-import { MatSelectChange } from '@angular/material/select';
 import { CustomSelectors } from '@others/custom-selectors';
-import { Environments } from '@store/actions/environments.actions';
 import { Features } from '@store/actions/features.actions';
+import { KEY_CODES } from '@others/enums';
 
 interface PassedData {
   environment_id: number;
@@ -112,9 +112,6 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = [];
   bases: string[] = ['feature', 'environment', 'department'];
   isEditing: boolean = false;
-  departmentChecked = false;
-  featureChecked = false;
-  depAndFeatChecked: boolean = false;
   errors = { name: null, value: null };
   variables: VariablePair[];
   variable_backup: VariablePair;
@@ -122,6 +119,11 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
   searchTerm: string = '';
   isDialog: boolean = false;
   dataSource;
+  departmentChecked = false;
+  featureChecked = false;
+  depAndFeatChecked: boolean = false;
+  features$: Observable<any[]>;
+  allFeatures: any[] = []
   
   @ViewChild('tableWrapper') tableWrapper: ElementRef;
   @ViewChild(MatSort) sort: MatSort;
@@ -168,13 +170,11 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
         ? this.getFilteredVariables(data)
         : this.getAllVariables(data);
       this.dataSource = new MatTableDataSource(this.variables);
-      // console.log("Data source: ", this.dataSource.data);
 
       this.departments$ = this._store.select(CustomSelectors.GetDepartmentFolders())
 
       this.departments$.pipe(takeUntil(this.destroy$)).subscribe(departments => {
         this.departments = departments;
-        // console.log("This depart: ", this.departments)
       });
       // Inbuilt MatTableDataSource.filterPredicate determines which columns filter term must be applied to
       this.applyFilterPredicate();
@@ -187,11 +187,6 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
     this.displayedColumns = this.allColumns
     .filter(item => item.activated)
     .map(item => item.value);
-    // console.log( this.displayedColumns);
-    // console.log("This data: ", this.data);
-    // console.log("Bases: ", this.bases);
-    // console.log("Data source: ", this.dataSource);
-    // console.log("Departments: ", this.departments);
   }
 
   ngOnDestroy(): void {
@@ -396,6 +391,7 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
 
   // binded to (input) event. Actualizes input's validator status every time user focuses out of input
   setInputStatus(errors: any, control: string) {
+    console.log("Errors: ", errors, "Control: ", control)
     this.errors[control] = errors;
   }
 
@@ -466,47 +462,6 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
     return clone;
   }
 
-  // Asegúrate de que getFilteredVariables filtre correctamente las variables basadas en el departamento
-  // getFilteredVariablesBySelector(variables: VariablePair[]) {
-  // let reduced = variables.reduce(
-  //   (filtered_variables: VariablePair[], current: VariablePair) => {
-  //     // stores variables, if it's id coincides with received department id and it is based on department
-  //     const byDeptOnly =
-  //       current.department === this.selectedDepartment &&
-  //       current.based === 'department'
-  //         ? current
-  //         : null;
-
-  //     // stores variable if department id coincides with received department id and
-  //     // environment or feature ids coincide with received ones, additionally if feature id coincides variable must be based on feature. If environment id coincides, variables must be based on environment.
-  //     const byEnv =
-  //       current.department === this.selectedDepartment &&
-  //       ((current.environment === this.data.environment_id &&
-  //         current.based === 'environment') ||
-  //         (current.feature === this.data.feature_id &&
-  //           current.based === 'feature'))
-  //         ? current
-  //         : null;
-
-  //     // pushes stored variables into array if they have value
-  //     byDeptOnly ? filtered_variables.push(byDeptOnly) : null;
-  //     byEnv ? filtered_variables.push(byEnv) : null;
-
-  //     // removes duplicated variables and returs set like array
-  //     return filtered_variables.filter(
-  //       (value, index, self) =>
-  //         index === self.findIndex(v => v.id === value.id)
-  //     );
-  //   },
-  //   []
-  // );
-  // // disables every table row, except the one that is newly created in is still not saved in db
-  // const clone = reduced.map((item: VariablePair) => {
-  //   return { ...item, disabled: item.id === 0 ? false : true };
-  // });
-  // return clone;
-  // }
-
   // just disables table rows, filters are not applied. This only happens when template is displayed as child component instead of dialog
   getAllVariables(variables: VariablePair[]) {
     return variables.map((item: VariablePair) => {
@@ -539,13 +494,10 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
     new_var.in_use = [];
     new_var.disabled = false;
 
-    console.log("New var: ", new_var);
-
     this._store.dispatch(new Variables.UpdateOrCreateVariable(new_var));
     this.isEditing = true;
   }
-    
-
+  
   showSelect: boolean = false;
   selectedDepartment: { id: number, name: string } = { 
     id: null, 
@@ -558,33 +510,16 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
     id_enviornment: null, 
     name_environment: '',
   };
-
-  features$: Observable<any[]>;
-  allFeatures: any[] = []
-
-  startFunctions(){
-    this.createNewVarInstanceBySelector();
-    this.applyValidators();
-    this.isEditing = true;
-
-    // scrolls up to top and focus new variable row
-    setTimeout(() => {
-      this.tableWrapper.nativeElement.scrollTo(0, 0);
-      document.getElementById('name-0').focus();
-    }, 0);
-  }
+  
+  selectionsDisabled: boolean = false;
 
   onDepartmentSelect($event){
-    console.log(this.selectedDepartment);
     this._store.dispatch(new Features.GetFeatures()).subscribe(() => {
-      // Selecciona la parte correcta del estado
       this.features$ = this._store.select(state => state.features.details);
       this.features$.pipe(
         map(features => {
-          console.log(features, this.selectedDepartment);
           const featuresArray = Object.values(features);
           this.allFeatures = featuresArray.filter(feature => feature.department_id == this.selectedDepartment.id);
-          console.log("Filtered Features:", this.allFeatures);
         })
       ).subscribe();
     });
@@ -594,16 +529,55 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
   onFeatureSelect($event){
     this.featureChecked = true;
     this.checkDoubleSelect();
-    // this.createNewVarInstanceBySelector();
   }
-
+  
   checkDoubleSelect() {
     if(this.departmentChecked && this.featureChecked){
       this.depAndFeatChecked = true;
     }
   }
   
-  createNewVarInstanceBySelector() {
+  startFunctions() {
+    this.selectionsDisabled = true;
+    
+    this.createNewVarInstanceBySelector();
+
+    const filteredVariables = this.getAllVariablesWithNew(this.variables);
+    this.dataSource = new MatTableDataSource(filteredVariables);
+    this.isEditing = true;
+
+    this.applyValidators();
+    
+    setTimeout(() => {
+        this.tableWrapper.nativeElement.scrollTo(0, 0);
+        document.getElementById('name-0')?.focus();
+    }, 0);
+  }
+  
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    let KeyPressed = event.keyCode;
+    console.log(KeyPressed);
+    if(KEY_CODES.ESCAPE){
+      this.selectionsDisabled = false;
+    }
+    // switch (event.keyCode) {
+    //   case KEY_CODES.ESCAPE:
+    //     this.selectionsDisabled = true;
+    //     console.log('Escape key pressed, selectionsDisabled set to true.');
+    // }
+  }
+
+  getAllVariablesWithNew(variables: VariablePair[]) {
+    const allVariables = variables.map((item: VariablePair) => {
+        return { ...item, disabled: item.id === 0 ? false : true };
+    });
+    this.dataSource.data = allVariables;
+
+    return allVariables;
+  }
+  
+  createNewVarInstanceBySelector(){
     const new_var = <VariablePair>{};
 
     new_var.id = 0;
@@ -612,16 +586,14 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
     new_var.department_name = this.selectedDepartment.name;
     new_var.environment_name = this.selectedFeature.name_environment;
     new_var.feature_name = this.selectedFeature.name;
-    new_var.feature = this.data.feature_id === 0 ? null : this.selectedFeature.id;
+    new_var.feature = this.selectedFeature.id === 0 ? null : this.selectedFeature.id;
     new_var.variable_name = '';
     new_var.variable_value = '';
     new_var.encrypted = false;
-    new_var.based = this.data.feature_id === 0 ? 'department' : 'feature';
+    new_var.based = this.selectedFeature.id === 0 ? 'department' : 'feature';
     new_var.in_use = [];
     new_var.disabled = false;
 
-    console.log("New var: ", new_var);
-    
     this._store.dispatch(new Variables.UpdateOrCreateVariable(new_var));
     this.isEditing = true;
   }
@@ -640,6 +612,7 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
               )
             : this._store.dispatch(new Variables.DeleteVariable(variable.id));
           this._snack.open('Action has been completed successfully!', 'OK');
+          this.selectionsDisabled = false;
         }
       },
       error: err => {
