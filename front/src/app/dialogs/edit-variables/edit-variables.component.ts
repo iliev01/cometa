@@ -136,6 +136,7 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
   canDelete: boolean;
   departments$: Observable<Folder[]>
   departments: Folder[] = [];
+  filterFocus: boolean = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: PassedData,
@@ -148,7 +149,11 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
   ) {}
 
   sendInputFocusToParent(inputFocus: boolean): void {
-    this.inputFocusService.setInputFocus(inputFocus);
+    if (this.searchTerm.trim().length > 0) {
+      this.selectionsDisabled = true;
+    } else {
+      this.selectionsDisabled = inputFocus;
+    }
   }
 
   ngOnInit(): void {
@@ -342,6 +347,10 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
 
     // notify view that user is no longer editing any variable
     this.isEditing = false;
+
+    // Enable selectdepartment and selectfeature
+    this.selectionsDisabled = false;
+    this.departmentChecked = false;
   }
 
   // fired when user clicks on Add Variable button
@@ -376,6 +385,7 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
   // Receives string from search input and adds it to dataSource as filterTerm.
   applyFilter() {
     this.dataSource.filter = this.searchTerm.trim().toLowerCase();
+    this.selectionsDisabled = this.searchTerm.trim().length > 0;
   }
 
   // determines which columns filter must be applied to
@@ -391,7 +401,6 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
 
   // binded to (input) event. Actualizes input's validator status every time user focuses out of input
   setInputStatus(errors: any, control: string) {
-    console.log("Errors: ", errors, "Control: ", control)
     this.errors[control] = errors;
   }
 
@@ -498,7 +507,6 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
     this.isEditing = true;
   }
   
-  showSelect: boolean = false;
   selectedDepartment: { id: number, name: string } = { 
     id: null, 
     name: '' 
@@ -532,13 +540,12 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
   }
   
   checkDoubleSelect() {
-    if(this.departmentChecked && this.featureChecked){
-      this.depAndFeatChecked = true;
-    }
+    this.depAndFeatChecked = this.departmentChecked && this.featureChecked;
   }
   
   startFunctions() {
     this.selectionsDisabled = true;
+    this.depAndFeatChecked = false;
     
     this.createNewVarInstanceBySelector();
 
@@ -547,6 +554,8 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
     this.isEditing = true;
 
     this.applyValidators();
+    this.selectedDepartment = null;
+    this.selectedFeature = null;
     
     setTimeout(() => {
         this.tableWrapper.nativeElement.scrollTo(0, 0);
@@ -557,15 +566,9 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
     let KeyPressed = event.keyCode;
-    console.log(KeyPressed);
     if(KEY_CODES.ESCAPE){
       this.selectionsDisabled = false;
     }
-    // switch (event.keyCode) {
-    //   case KEY_CODES.ESCAPE:
-    //     this.selectionsDisabled = true;
-    //     console.log('Escape key pressed, selectionsDisabled set to true.');
-    // }
   }
 
   getAllVariablesWithNew(variables: VariablePair[]) {

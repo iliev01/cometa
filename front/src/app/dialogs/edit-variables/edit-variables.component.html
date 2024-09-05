@@ -33,42 +33,49 @@
         [(ngModel)]="searchTerm"
         placeholder="Type a search term" 
         (focus)="sendInputFocusToParent(true)" 
-        (blur)="sendInputFocusToParent(false)"/>
+        (blur)="sendInputFocusToParent(false)"
+        [disabled]="selectionsDisabled"/>
     </mat-form-field>
     <div class="columns-button-wrapper">
-      <button mat-stroked-button [matMenuTriggerFor]="selectedColumns">
-        Columns Shown
-      </button>
-      <ng-container>
-        <mat-form-field>
-          <mat-label>Select Department</mat-label>
-          <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="onDepartmentSelect($event)"
-          [disabled]="selectionsDisabled">
-            <mat-option *ngFor="let department of departments" [value]="{ id: department.folder_id, name: department.name}">
-              {{ department.name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </ng-container>
-      <ng-container>
-        <mat-form-field>
-          <mat-select [(ngModel)]="selectedFeature" placeholder="Select Feature"
-          (selectionChange)="onFeatureSelect($event)"
-          [disabled]="!departmentChecked || selectionsDisabled">
-            <mat-option *ngFor="let feature of allFeatures" [value]="{ id: feature.feature_id, name: feature.feature_name, id_enviornment: feature.environment_id, name_environment: feature.environment_name }">
-              {{ feature.feature_name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </ng-container>
-      <button
-      color="primary"
-      (click)="startFunctions()"
-      class="add"
-      [disabled]="!depAndFeatChecked"
-      mat-stroked-button>
-      Add variable
-      </button>
+      <div class="selectors-container">
+        <ng-container>
+          <mat-form-field class="selectFormField">
+            <mat-label>Select Department</mat-label>
+            <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="onDepartmentSelect($event)"
+                        [disabled]="selectionsDisabled">
+              <mat-option *ngFor="let department of departments" [value]="{ id: department.folder_id, name: department.name }">
+                <mat-card>{{ department.name }}</mat-card>
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </ng-container>
+      
+        <ng-container>
+          <mat-form-field class="selectFormField">
+            <mat-label>Select Feature</mat-label>
+            <mat-select [(ngModel)]="selectedFeature" (selectionChange)="onFeatureSelect($event)"
+                        [disabled]="!departmentChecked || selectionsDisabled">
+              <mat-option *ngFor="let feature of allFeatures" 
+                          [value]="{ id: feature.feature_id, name: feature.feature_name, id_enviornment: feature.environment_id, name_environment: feature.environment_name }">
+                <mat-card>{{ feature.feature_name }}</mat-card>
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </ng-container>
+      </div>
+      <div class="buttons-container">
+        <button class="button-column" mat-stroked-button [matMenuTriggerFor]="selectedColumns">
+          Columns Shown
+        </button>
+        <button
+        color="primary"
+        (click)="startFunctions()"
+        class="add"
+        [disabled]="!depAndFeatChecked"
+        mat-stroked-button>
+        Add variable
+        </button>
+      </div>
       <mat-menu #selectedColumns="matMenu" class="variable-columns-menu">
         <div
         class="column-checkbox-wrapper"
