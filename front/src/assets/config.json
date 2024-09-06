@@ -234,7 +234,7 @@
   "changelog": [
     {
       "version": "2.8.381",
-      "date": "2024-08-31",
+      "date": "2024-09-06",
       "features": [
         {
           "title": "#4694 - Add functionality for selecting department and feature in variables section",
