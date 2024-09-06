@@ -20,22 +20,6 @@
   height: calc(100% - 275px);
 }
 
-// .columns-button-wrapper {
-//   display: flex;
-//   text-align: end;
-//   padding-bottom: 20px;
-//   justify-content: space-between;
-//   height: 40px;
-//   margin-top: 13px;
-//   margin-bottom: 10px;
-// }
-
-.add, .button-column{
-  height: 40px;
-  margin-top: 13px;
-  margin-bottom: 10px;
-}
-
 .env-info {
   display: flex;
 
@@ -148,44 +132,52 @@ mat-dialog-actions {
   gap: 8px;
 }
 
-.selectFormField {
-  min-width: 50px; 
-  width: 150px;
-}
-
-.selectors-container {
+.container-father {
   display: flex;
-  flex-direction: row; 
-  margin-bottom: 10px; 
-  justify-content: center; 
-  gap: 200px;
-}
-
-.selectors-container mat-form-field:nth-of-type(1){
-  margin-left: 10px;
-}
-.selectors-container mat-form-field:nth-of-type(2){
-  margin-right: 10px;
-}
-
-// .selectors-container, .buttons-container {
-//   // justify-content: space-between;
-// }
-
-.buttons-container {
-  display: flex;
-  flex-direction: row; 
+  flex-direction: row;
   justify-content: space-between;
-  // justify-content: center;
-  // gap: 100px;
-  // button {
-  //   width: 100%;
-  // }
+  height: 100%; 
 }
 
-.buttons-container button:nth-of-type(1){
-  margin-left: 10px;
+.add, .button-column{
+  height: 40px;
+  margin-top: 13px;
+  margin-bottom: 10px;
 }
-.buttons-container button:nth-of-type(2){
-  margin-right: 10px;
+
+
+@media (max-width: 768px) {
+  .container-father {
+    position: relative;
+    height: 15vh; 
+  }
+
+  .selectFormField {
+    width: 145px;
+  }
+
+  .container-father .selectFormField:nth-last-of-type(2) {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  
+  .container-father .selectFormField:nth-last-of-type(1) {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+
+  button {
+    align-self: flex-end; 
+  }
+
+  .add, .button-column{
+    margin-bottom: 10px;
+    width: auto;
+  }
+}
+
+.feature {
+  height: 14px;
 }

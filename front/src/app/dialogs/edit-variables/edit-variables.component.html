@@ -33,14 +33,19 @@
         [(ngModel)]="searchTerm"
         placeholder="Type a search term" 
         (focus)="sendInputFocusToParent(true)" 
-        (blur)="sendInputFocusToParent(false)"
-        [disabled]="selectionsDisabled"/>
+        (blur)="sendInputFocusToParent(false)"/>
     </mat-form-field>
     <div class="columns-button-wrapper">
-      <div class="selectors-container">
+      <button *ngIf="isDialog" mat-stroked-button [matMenuTriggerFor]="selectedColumns">
+        Columns Shown
+      </button>
+      <div class="container-father" *ngIf="!isDialog">
+        <button class="button-column" mat-stroked-button [matMenuTriggerFor]="selectedColumns">
+          Columns Shown
+        </button>
         <ng-container>
           <mat-form-field class="selectFormField">
-            <mat-label>Select Department</mat-label>
+            <mat-label><mat-icon>domain</mat-icon> Select Department</mat-label>
             <mat-select [(ngModel)]="selectedDepartment" (selectionChange)="onDepartmentSelect($event)"
                         [disabled]="selectionsDisabled">
               <mat-option *ngFor="let department of departments" [value]="{ id: department.folder_id, name: department.name }">
@@ -52,7 +57,7 @@
       
         <ng-container>
           <mat-form-field class="selectFormField">
-            <mat-label>Select Feature</mat-label>
+            <mat-label><img class="feature" src="assets/img/feature.svg" alt="Select Feature"> Select Feature</mat-label>
             <mat-select [(ngModel)]="selectedFeature" (selectionChange)="onFeatureSelect($event)"
                         [disabled]="!departmentChecked || selectionsDisabled">
               <mat-option *ngFor="let feature of allFeatures" 
@@ -62,11 +67,6 @@
             </mat-select>
           </mat-form-field>
         </ng-container>
-      </div>
-      <div class="buttons-container">
-        <button class="button-column" mat-stroked-button [matMenuTriggerFor]="selectedColumns">
-          Columns Shown
-        </button>
         <button
         color="primary"
         (click)="startFunctions()"

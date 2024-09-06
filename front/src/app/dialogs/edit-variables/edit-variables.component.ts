@@ -124,6 +124,7 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
   depAndFeatChecked: boolean = false;
   features$: Observable<any[]>;
   allFeatures: any[] = []
+  selectionsDisabled: boolean = false;
   
   @ViewChild('tableWrapper') tableWrapper: ElementRef;
   @ViewChild(MatSort) sort: MatSort;
@@ -136,7 +137,6 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
   canDelete: boolean;
   departments$: Observable<Folder[]>
   departments: Folder[] = [];
-  filterFocus: boolean = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: PassedData,
@@ -149,11 +149,7 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
   ) {}
 
   sendInputFocusToParent(inputFocus: boolean): void {
-    if (this.searchTerm.trim().length > 0) {
-      this.selectionsDisabled = true;
-    } else {
-      this.selectionsDisabled = inputFocus;
-    }
+    this.inputFocusService.setInputFocus(inputFocus);
   }
 
   ngOnInit(): void {
@@ -385,7 +381,9 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
   // Receives string from search input and adds it to dataSource as filterTerm.
   applyFilter() {
     this.dataSource.filter = this.searchTerm.trim().toLowerCase();
-    this.selectionsDisabled = this.searchTerm.trim().length > 0;
+    if (this.searchTerm.trim().length > 0) {
+      this.selectionsDisabled = true;
+    }
   }
 
   // determines which columns filter must be applied to
@@ -518,8 +516,6 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
     id_enviornment: null, 
     name_environment: '',
   };
-  
-  selectionsDisabled: boolean = false;
 
   onDepartmentSelect($event){
     this._store.dispatch(new Features.GetFeatures()).subscribe(() => {
@@ -549,8 +545,7 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
     
     this.createNewVarInstanceBySelector();
 
-    const filteredVariables = this.getAllVariablesWithNew(this.variables);
-    this.dataSource = new MatTableDataSource(filteredVariables);
+    this.getAllVariablesWithNew(this.variables);
     this.isEditing = true;
 
     this.applyValidators();
@@ -565,7 +560,6 @@ export class EditVariablesComponent implements OnInit, OnDestroy {
   
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
-    let KeyPressed = event.keyCode;
     if(KEY_CODES.ESCAPE){
       this.selectionsDisabled = false;
     }
